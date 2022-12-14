@@ -1,6 +1,8 @@
 #pragma once
 
-#include "magma.h"
+#include "raylib.h"
+#include "raymath.h"
+#include "window.h"
 
 #define COMP_BASE (1 << 1)
 
