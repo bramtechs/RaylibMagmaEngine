@@ -1,5 +1,12 @@
 #pragma once
-#include "magma.h"
+
+#include <stdio.h>
+
+#include "raylib.h"
+#include "raymath.h"
+
+#include "logger.h"
+#include "memory.h"
 
 #define MAX_ASSETS 1000
 

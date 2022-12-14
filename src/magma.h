@@ -1,31 +1,19 @@
 #pragma once
 
+// c libraries
 #include <stdio.h>
 
+// the all powerful raylib
 #include "raylib.h"
+#include "raygui.h"
 #include "raymath.h"
 
-#include "raygui.h"
-
+// small quality of life stuff 
+#include "math.h"
+#include "memory.h"
 #include "logger.h"
+
+// main engine systems
 #include "assets.h"
 #include "entity.h"
 #include "window.h"
-
-// custom math
-
-#define MAX(a, b) ((a)>(b)? (a) : (b))
-#define MIN(a, b) ((a)<(b)? (a) : (b))
-
-// memory
-
-extern size_t Allocations;
-
-#define new(X) (X*)M_MemAlloc(sizeof(X))
-
-void assert(bool cond);
-
-void* M_MemAlloc(size_t size);
-void* M_MemFree(void* ptr);
-
-void CheckAllocations();
