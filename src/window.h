@@ -1,0 +1,17 @@
+#pragma once
+
+#include "magma.h"
+
+void InitMagmaWindow(int gameWidth, int gameHeight, int winWidth, int winHeight, const char* title); // create a raylib window with 'letterbox' support for
+                                                                                                     // those for crusty PS1 looks
+void BeginMagmaDrawing();
+
+void EndMagmaDrawing();
+
+void CloseMagmaWindow();
+
+float GetMagmaScaleFactor();
+float GetLeftMagmaWindowOffset(); // get the width of the horizontal black bars TODO RENAME
+float GetTopMagmaWindowOffset();  // get the height of the vertical black bars
+
+Vector2 GetScaledMousePosition();
