@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "window.h"
+#include "memory.h"
 
 #define COMP_BASE (1 << 1)
 
