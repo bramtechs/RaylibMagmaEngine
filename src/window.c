@@ -2,62 +2,41 @@
 
 // adapted from core_window_letterbox, thank you ~!
 
-// TODO put in struct!
-static int GameScreenWidth = 0;
-static int GameScreenHeight = 0;
-static int WindowWidth = 0;
-static int WindowHeight = 0;
-static RenderTexture2D RenderTarget = { 0 };
+typedef struct {
+    Vector2 gameSize;
+    Vector2 winSize;
+    RenderTexture2D renderTarget;
 
-float GetMagmaScaleFactor(){
-    return MIN((float)GetScreenWidth()/GameScreenWidth, (float)GetScreenHeight()/GameScreenHeight);
-}
+    float scale;
+    Vector2 virtualMouse;
 
-float GetLeftMagmaWindowOffset(){
-    float scale = GetMagmaScaleFactor(); // TODO cache this in global variable
-    return (GetScreenWidth() - ((float)GameScreenWidth*scale))*0.5f;
-}
-float GetTopMagmaWindowOffset(){
-    float scale = GetMagmaScaleFactor();
-    return (GetScreenHeight() - ((float)GameScreenHeight*scale))*0.5f;
-}
+} MagmaWindow;
+
+static MagmaWindow Win = { 0 };
 
 void InitMagmaWindow(int gameWidth, int gameHeight, int winWidth, int winHeight, const char* title){
+    Win.gameSize = (Vector2) {gameWidth, gameHeight};
+    Win.winSize = (Vector2) { winWidth, winHeight};
 
-    GameScreenWidth = gameWidth;
-    GameScreenHeight = gameHeight;
-    WindowWidth = winWidth;
-    WindowHeight = winHeight;
-
-    assert(GameScreenWidth > 0 && GameScreenHeight > 0 &&
-           WindowWidth > 0 && WindowHeight > 0);
+    assert(gameWidth > 0 && gameHeight > 0 &&
+           winWidth > 0 && winHeight > 0);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(GameScreenWidth,GameScreenHeight,title);
-    SetWindowMinSize(WindowWidth/2,WindowHeight/2);
+    InitWindow(gameWidth,gameHeight,title);
+    SetWindowMinSize(winWidth/2,winHeight/2);
     //SetWindowPosition((GetMonitorWidth(0) - WIDTH * SCALE) / 2, (GetMonitorHeight(0) - HEIGHT * SCALE) / 2);
 
     // Render texture initialization, used to hold the rendering result so we can easily resize it
-    RenderTarget = LoadRenderTexture(GameScreenWidth, GameScreenHeight);
-    SetTextureFilter(RenderTarget.texture, TEXTURE_FILTER_POINT);  // Texture scale filter to use
+    Win.renderTarget = LoadRenderTexture(gameWidth, gameHeight);
+    SetTextureFilter(Win.renderTarget.texture, TEXTURE_FILTER_POINT);  // Texture scale filter to use
 }
 
 void BeginMagmaDrawing(){
-    float scale = GetMagmaScaleFactor();
+    Win.scale = GetMagmaScaleFactor();
+    Win.virtualMouse = GetScaledMousePosition();
 
-    // Update virtual mouse (clamped mouse value behind game screen)
-    Vector2 virtualMouse = GetScaledMousePosition();
-
-    // Apply the same transformation as the virtual mouse to the real mouse (i.e. to work with raygui)
-    //SetMouseOffset(-(GetScreenWidth() - (GameScreenWidth*scale))*0.5f, -(GetScreenHeight() - (GameScreenHeight*scale))*0.5f);
-    //SetMouseScale(1/scale, 1/scale);
-    //----------------------------------------------------------------------------------
-
-    // Draw
-    //----------------------------------------------------------------------------------
-    // Draw everything in the render texture, note this will not be rendered on screen, yet
-    BeginTextureMode(RenderTarget);
-        ClearBackground(BLACK);  // Clear render texture background color
+    BeginTextureMode(Win.renderTarget);
+        ClearBackground(BLACK);
 
         // ....
 }
@@ -65,7 +44,6 @@ void BeginMagmaDrawing(){
 void EndMagmaDrawing(){
 
     // ....
-    float scale = GetMagmaScaleFactor();
 
     EndTextureMode();
     
@@ -76,23 +54,34 @@ void EndMagmaDrawing(){
         float top = GetTopMagmaWindowOffset();
 
         // Draw render texture to screen, properly scaled
-        DrawTexturePro(RenderTarget.texture, (Rectangle){ 0.0f, 0.0f, (float)RenderTarget.texture.width, (float)-RenderTarget.texture.height },
-                       (Rectangle){ left, top, (float)GameScreenWidth*scale, (float)GameScreenHeight*scale }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+        DrawTexturePro(Win.renderTarget.texture, (Rectangle){ 0.0f, 0.0f, (float)Win.renderTarget.texture.width, (float)-Win.renderTarget.texture.height },
+                       (Rectangle){ left, top, (float)Win.gameSize.x*Win.scale, (float)Win.gameSize.y*Win.scale }, (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
 
 void CloseMagmaWindow(){
-    UnloadRenderTexture(RenderTarget);
+    UnloadRenderTexture(Win.renderTarget);
     CloseWindow();
 }
 
-Vector2 GetScaledMousePosition(){
-        float scale = GetMagmaScaleFactor(); 
+float GetMagmaScaleFactor(){
+    return MIN((float)GetScreenWidth()/Win.gameSize.x,
+               (float)GetScreenHeight()/Win.gameSize.y);
+}
 
-        // Update virtual mouse (clamped mouse value behind game screen)
-        Vector2 mouse = GetMousePosition();
-        Vector2 virtualMouse = { 0 };
-        virtualMouse.x = (mouse.x - (GetScreenWidth() - (GameScreenWidth*scale))*0.5f)/scale;
-        virtualMouse.y = (mouse.y - (GetScreenHeight() - (GameScreenHeight*scale))*0.5f)/scale;
-        virtualMouse = Vector2Clamp(virtualMouse, (Vector2){ 0, 0 }, (Vector2){ (float)GameScreenWidth, (float)GameScreenHeight });
-        return virtualMouse;
+float GetLeftMagmaWindowOffset(){
+    return (GetScreenWidth() - ((float)Win.gameSize.x*Win.scale))*0.5f;
+}
+
+float GetTopMagmaWindowOffset(){
+    return (GetScreenHeight() - ((float)Win.gameSize.y*Win.scale))*0.5f;
+}
+
+Vector2 GetScaledMousePosition(){
+    // Update virtual mouse (clamped mouse value behind game screen)
+    Vector2 mouse = GetMousePosition();
+    Vector2 virtualMouse = { 0 };
+    virtualMouse.x = (mouse.x - (GetScreenWidth() - (Win.gameSize.x*Win.scale))*0.5f)/Win.scale;
+    virtualMouse.y = (mouse.y - (GetScreenHeight() - (Win.gameSize.y*Win.scale))*0.5f)/Win.scale;
+    virtualMouse = Vector2Clamp(virtualMouse, (Vector2){ 0, 0 }, (Vector2){ (float)Win.gameSize.x, (float)Win.gameSize.y });
+    return virtualMouse;
 }

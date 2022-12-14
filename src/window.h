@@ -11,7 +11,7 @@ void EndMagmaDrawing();
 void CloseMagmaWindow();
 
 float GetMagmaScaleFactor();
-float GetLeftMagmaWindowOffset(); // get the width of the horizontal black bars TODO RENAME
+float GetLeftMagmaWindowOffset(); // get the width of the horizontal black bars
 float GetTopMagmaWindowOffset();  // get the height of the vertical black bars
 
 Vector2 GetScaledMousePosition();
