@@ -27,7 +27,7 @@ typedef struct {
     Entity* root;
 } EntityGroup;
 
-typedef void(*POLL_FUNC)(void*,EntityGroup* group);
+typedef void(*POLL_FUNC)(Entity,EntityGroup* group);
 
 typedef struct {
     Vector3 pos;

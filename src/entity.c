@@ -100,7 +100,7 @@ size_t PollEntities(EntityGroup* group, Components filter, POLL_FUNC func){
     while (next != NULL){
         if (CheckEntityComponents(next,filter)){
             if (func != NULL){
-                (*func)(next->content,group);
+                (*func)(*next,group);
             }
             counter ++;
         }

@@ -2,6 +2,7 @@
 
 // c libraries
 #include <stdio.h>
+#include <string.h>
 
 // the all powerful raylib
 #include "raylib.h"
