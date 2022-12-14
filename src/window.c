@@ -32,8 +32,15 @@ void InitMagmaWindow(int gameWidth, int gameHeight, int winWidth, int winHeight,
 }
 
 void BeginMagmaDrawing(){
-    Win.scale = GetMagmaScaleFactor();
-    Win.virtualMouse = GetScaledMousePosition();
+    Win.scale = MIN((float)GetScreenWidth()/Win.gameSize.x,
+               (float)GetScreenHeight()/Win.gameSize.y);
+
+    // Update virtual mouse (clamped mouse value behind game screen)
+    Vector2 mouse = GetMousePosition();
+    Vector2 virtualMouse = { 0 };
+    Win.virtualMouse.x = (mouse.x - (GetScreenWidth() - (Win.gameSize.x*Win.scale))*0.5f)/Win.scale;
+    Win.virtualMouse.y = (mouse.y - (GetScreenHeight() - (Win.gameSize.y*Win.scale))*0.5f)/Win.scale;
+    virtualMouse = Vector2Clamp(virtualMouse, (Vector2){ 0, 0 }, (Vector2){ (float)Win.gameSize.x, (float)Win.gameSize.y });
 
     BeginTextureMode(Win.renderTarget);
         ClearBackground(BLACK);
@@ -64,8 +71,7 @@ void CloseMagmaWindow(){
 }
 
 float GetMagmaScaleFactor(){
-    return MIN((float)GetScreenWidth()/Win.gameSize.x,
-               (float)GetScreenHeight()/Win.gameSize.y);
+    return Win.scale;
 }
 
 float GetLeftMagmaWindowOffset(){
@@ -77,11 +83,5 @@ float GetTopMagmaWindowOffset(){
 }
 
 Vector2 GetScaledMousePosition(){
-    // Update virtual mouse (clamped mouse value behind game screen)
-    Vector2 mouse = GetMousePosition();
-    Vector2 virtualMouse = { 0 };
-    virtualMouse.x = (mouse.x - (GetScreenWidth() - (Win.gameSize.x*Win.scale))*0.5f)/Win.scale;
-    virtualMouse.y = (mouse.y - (GetScreenHeight() - (Win.gameSize.y*Win.scale))*0.5f)/Win.scale;
-    virtualMouse = Vector2Clamp(virtualMouse, (Vector2){ 0, 0 }, (Vector2){ (float)Win.gameSize.x, (float)Win.gameSize.y });
-    return virtualMouse;
+    return Win.virtualMouse;
 }
