@@ -8,43 +8,21 @@
 #include "logger.h"
 #include "memory.h"
 
-#define MAX_ASSETS 1000
-
-// TODO to complicated!!!!!
-// just having an array of all asset types will be the easiest solution tbh
-
-typedef enum {
-    AssetTexture,
-    AssetImage,
-    AssetMesh,
-    AssetModel,
-    AssetSound,
-} AssetType; // TODO don't keep this
+#define MAX_ASSETS 512 
 
 typedef struct {
-    AssetType type;
-    char name[256]; // TODO don't keep this
-    void* memory;
-} Asset;
+	char folder[128];
 
-typedef struct {
-    char folder[256];
-    Asset assets[MAX_ASSETS];
-    size_t count;
+	Texture textures[MAX_ASSETS];
+	size_t textureCount;
+	Model models[MAX_ASSETS];
+	size_t modelCount;
+
 } Assets;
 
-typedef struct {
-    const char** names;
-    size_t count; 
-} AssetList;
 
-// TODO try to use macros
-
-void LoadAssets(const char* folder);
+void InitAssets(const char* folder);
 void UnloadAssets();
 
-Model* GetModel(const char* name);
-
-AssetList GetLoadedAssetList();
-void UnloadAssetList(AssetList list);
-
+Texture RequestTexture(const char* name);
+Model RequestModel(const char* name);
