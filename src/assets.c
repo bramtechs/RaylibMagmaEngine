@@ -1,32 +1,73 @@
 #include "assets.h"
 
-static Asset* create_asset(Assets *assets, const char* name, size_t size, AssetType type){
-    Asset* asset = &assets->assets[assets->count];
-    assets->count++;
-    assert(assets->count < MAX_ASSETS);
+// TODO way to complicated, don't
+
+static Assets* LoadedAssets = NULL;
+
+static Asset* create_asset(const char* name, size_t size, AssetType type){
+    Asset* asset = &LoadedAssets->assets[LoadedAssets->count];
+
+    LoadedAssets->count++;
+    assert(LoadedAssets->count < MAX_ASSETS);
 
     asset->type = type;
     asset->memory = M_MemAlloc(size);
-    strcpy(asset->name,name);
+
+    // strip prefix from name
+    // TODO: unsafe
+
+    int prefixLength = strlen(LoadedAssets->folder);
+    char *shortName = strncmp(name, LoadedAssets->folder, prefixLength) ? name : name + prefixLength;
+
+    if (shortName[0] == '/'){
+        memmove(shortName, shortName + 1, strlen(shortName));
+    }
+
+    strcpy(asset->name,shortName);
 
     return asset;
 }
 
-static void load_file(Assets *assets, const char* name){
+static void load_file(const char* name){
+    assert(LoadedAssets);
+
     if (IsFileExtension(name,".png")){
-        Asset* asset = create_asset(assets,name,sizeof(Texture),AssetTexture);
+        Asset* asset = create_asset(name,sizeof(Texture),AssetTexture);
         Texture texture = LoadTexture(name);
         // TODO add placeholder
         memcpy(asset->memory,&texture,sizeof(Texture));
     }
-    else if (IsFileExtension(name,".wav")){
-
+    else if (IsFileExtension(name,".obj")){
+        Asset* asset = create_asset(name,sizeof(Model),AssetModel);
+        Model model = LoadModel(name);
+        Image image = GenImageChecked(128, 128, 10, 10, RED, WHITE);
+        //model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(image);
+        memcpy(asset->memory,&model,sizeof(Model));
     }
+
+    INFO("Loaded %s",name);
 }
 
-Assets* LoadAssets(const char* folder){
-    Assets* assets = new(Assets);
-    strcpy(assets->folder,folder);
+// TODO macro
+Model* GetModel(const char* name){
+    assert(LoadedAssets);
+
+    for (int i = 0; i < LoadedAssets->count; i++){
+        Asset asset = LoadedAssets->assets[i];
+        if (strcmp(asset.name, name)){
+            Model* model = asset.memory;
+            return model;
+        }
+    }
+    return NULL;
+}
+
+static int Attemps = 0;
+
+// TODO add better hack to replace this hack
+void LoadAssets(const char* folder){
+    LoadedAssets = new(Assets);
+    strcpy(LoadedAssets->folder,folder);
 
     INFO("Loading assets...");
 
@@ -34,27 +75,33 @@ Assets* LoadAssets(const char* folder){
         FilePathList list = LoadDirectoryFilesEx(folder, NULL, true);
         for (int i = 0; i < list.count; i++){
             const char *name = list.paths[i];
-            load_file(assets,name);
+            load_file(name);
         }
         UnloadDirectoryFiles(list);
-    }else{
+    }else if (Attemps < 2) {
         ERROR("Asset directory not found!");
+        // TODO visual studio hack
+        Attemps++;
+        LoadAssets("../../assets");
     }
-
-    return assets;
 }
 
-void UnloadAssets(Assets* assets){
-    M_MemFree(assets);
-    INFO("Disposed assets!");
+void UnloadAssets(){
+    assert(LoadedAssets);
+    M_MemFree(LoadedAssets);
+    //INFO("Disposed assets!");
+    WARN("TODO dispose assets!");
 }
 
-AssetList GetLoadedAssetList(Assets *assets){
+AssetList GetLoadedAssetList(){
+    assert(LoadedAssets);
+
     AssetList list = { 0 };
-    list.count = assets->count;
-    list.names = (char**) M_MemAlloc(assets->count*sizeof(char)*256);
-    for (int i = 0; i < assets->count; i++){
-       list.names[i] = assets->assets[i].name;
+    list.count = LoadedAssets->count;
+    list.names = (char**) M_MemAlloc(LoadedAssets->count*sizeof(char)*256);
+    for (int i = 0; i < LoadedAssets->count; i++){
+       list.names[i] = LoadedAssets->assets[i].name;
+       INFO(list.names[i]);
     }
     return list;
 }

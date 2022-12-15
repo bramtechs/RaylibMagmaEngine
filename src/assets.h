@@ -10,17 +10,20 @@
 
 #define MAX_ASSETS 1000
 
+// TODO to complicated!!!!!
+// just having an array of all asset types will be the easiest solution tbh
+
 typedef enum {
     AssetTexture,
     AssetImage,
     AssetMesh,
     AssetModel,
     AssetSound,
-} AssetType;
+} AssetType; // TODO don't keep this
 
 typedef struct {
     AssetType type;
-    char name[256];
+    char name[256]; // TODO don't keep this
     void* memory;
 } Asset;
 
@@ -35,11 +38,13 @@ typedef struct {
     size_t count; 
 } AssetList;
 
-constructor(Assets);
-destructor(Assets);
+// TODO try to use macros
 
-Assets* LoadAssets(const char* folder);
+void LoadAssets(const char* folder);
 void UnloadAssets();
 
-AssetList GetLoadedAssetList(Assets *assets);
+Model* GetModel(const char* name);
+
+AssetList GetLoadedAssetList();
 void UnloadAssetList(AssetList list);
+
