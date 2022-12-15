@@ -1,15 +1,7 @@
 #pragma once
 
-// c libraries
-#include <stdio.h>
-#include <string.h>
-
-// the all powerful raylib
-#include "raylib.h"
-#include "raygui.h"
-#include "raymath.h"
-
-// small quality of life stuff 
+// small quality of life stuff
+#include "common.h"
 #include "math.h"
 #include "memory.h"
 #include "logger.h"

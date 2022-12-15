@@ -65,7 +65,7 @@ EntityGroup* CreateEntityGroup(){
 }
 
 // TODO horrible name
-void add_group_entity_child(Entity* root, void* data, size_t size, Components comps,
+void add_group_entity_child(Entity* root, void* data, uint size, Components comps,
                             UPDATE_FUNC updateFunc, DRAW_FUNC drawFunc){
     assert(root != NULL);
 
@@ -83,7 +83,7 @@ void add_group_entity_child(Entity* root, void* data, size_t size, Components co
     memcpy(root->next->content,data,size);
 }
 
-void AddGroupEntity(EntityGroup* group, void* data, size_t size, Components comps,
+void AddGroupEntity(EntityGroup* group, void* data, uint size, Components comps,
                     UPDATE_FUNC updateFunc, DRAW_FUNC drawFunc){
     assert(group != NULL);
 
@@ -94,9 +94,9 @@ bool CheckEntityComponents(Entity* entity, Components filter){
     return (entity->components & filter) > 0;
 }
 
-size_t PollEntities(EntityGroup* group, Components filter, POLL_FUNC func){
+uint PollEntities(EntityGroup* group, Components filter, POLL_FUNC func){
     Entity *next = group->root->next;
-    size_t counter = 0;
+    uint counter = 0;
     while (next != NULL){
         if (CheckEntityComponents(next,filter)){
             if (func != NULL){
@@ -109,11 +109,11 @@ size_t PollEntities(EntityGroup* group, Components filter, POLL_FUNC func){
     return counter;
 }
 
-size_t UpdateGroup(EntityGroup* group, float delta){
+uint UpdateGroup(EntityGroup* group, float delta){
     assert(group != NULL);
 
     Entity *next = group->root->next;
-    size_t counter = 0;
+    uint counter = 0;
     while (next != NULL){
         UPDATE_FUNC func = next->updateFunc;
         if (func != NULL){
@@ -125,11 +125,11 @@ size_t UpdateGroup(EntityGroup* group, float delta){
     return counter;
 }
 
-size_t DrawGroup(EntityGroup* group){
+uint DrawGroup(EntityGroup* group){
     assert(group != NULL);
 
     Entity *next = group->root->next;
-    size_t counter = 0;
+    uint counter = 0;
     while (next != NULL){
         DRAW_FUNC func = next->drawFunc;
         if (func != NULL){

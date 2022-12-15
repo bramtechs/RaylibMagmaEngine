@@ -1,9 +1,10 @@
-#include "magma.h"
+#include "common.h"
+#include "logger.h"
+#include "memory.h"
 
+static uint Allocations = 0;
 
-static size_t Allocations = 0;
-
-void* M_MemAlloc(size_t size){
+void* M_MemAlloc(uint size){
     void* ptr = MemAlloc(size);
     Allocations++;
     return ptr;
