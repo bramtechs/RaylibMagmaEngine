@@ -11,6 +11,7 @@
 
 // small quality of life stuff 
 #include "math.h"
+#include "array.h"
 #include "memory.h"
 #include "logger.h"
 
