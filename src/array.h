@@ -19,7 +19,7 @@ Array* MakeArray(size_t itemSize);
 
 void* GetArrayItemRaw(Array* array, size_t index);
 
-#define GetArrayItem(ARRAY,INDEX,TYPE) (TYPE*) GetArrayItemPtr(ARRAY,INDEX)
+#define GetArrayItem(ARRAY,INDEX,TYPE) (TYPE*) GetArrayItemRaw(ARRAY,INDEX)
 
 void* PushArrayRaw(Array* array, void* item);
 

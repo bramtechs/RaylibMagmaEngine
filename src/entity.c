@@ -1,5 +1,6 @@
 #include "entity.h"
 
+
 Base CreateBase(Vector3 pos, Color tint){
     return (Base) {
         -1, pos, Vector3One(), Vector3One(), tint
@@ -12,23 +13,18 @@ Base CreateDefaultBase(){
     };
 }
 
-Base CreateRandomBase(){
-    int MAX_RANGE = 100;
+ModelRenderer CreateModelRenderer(const char* modelPath, Base* base){
+    Model model = RequestModel(modelPath);
 
-    Vector3 pos = {
-        GetRandomValue(-MAX_RANGE,MAX_RANGE),
-        GetRandomValue(-MAX_RANGE,MAX_RANGE),
-        GetRandomValue(-MAX_RANGE,MAX_RANGE)
+    // offset the Base with the loaded geometry
+    BoundingBox box = GetModelBoundingBox(model);
+    base->pos = Vector3Subtract(base->pos,box.min);
+    base->size = Vector3Subtract(box.max,box.min);
+
+    return (ModelRenderer) {
+        -1,
+        model
     };
-
-    Color col = {
-        GetRandomValue(100,255),
-        GetRandomValue(100,255),
-        GetRandomValue(100,255),
-        255
-    };
-
-    return CreateBase(pos,col);
 }
 
 BoundingBox GetBaseBounds(Base base){
@@ -63,6 +59,7 @@ EntityGroup* CreateEntityGroup() {
     EntityGroup *g = new(EntityGroup);
     g->entityCount = 0;
     g->bases = MakeArray(sizeof(Base));
+    g->modelRenderers = MakeArray(sizeof(ModelRenderer));
     return g;
 }
 
@@ -74,24 +71,43 @@ EntityID AddEntity(EntityGroup* group){
     return id;
 }
 
-void update_group_entity(int i, void* ptr){
-    // TODO add velocity to position
+void* GetEntityComponentRaw(Array* array, EntityID id){
+    for(int i = 0; i < array->count; i++){
+        void* data = GetArrayItemRaw(array,i);
+        // TODO dirty hack 
+        EntityID otherId = *((EntityID*) data);
+        if (otherId == id){
+            return data;
+        }
+    }
+    return NULL;
 }
+
 
 size_t UpdateGroup(EntityGroup* group, float delta){
     assert(group != NULL);
 
-    IterateArray(group->bases, update_group_entity);
+    // IterateArray(group->bases, update_group_entity_bases);
     return group->entityCount;
 }
 
-void draw_group_entity(int i, void* ptr){
-    // TODO draw bounding box
+void draw_group_entity_renderers(int _, void* ptr){
 }
 
 size_t DrawGroup(EntityGroup* group){
     assert(group != NULL);
 
-    IterateArray(group->bases, update_group_entity);
+    for (int i = 0; i < group->bases->count; i++){
+        Base* base = GetArrayItem(group->bases,i,Base);
+        DrawCubeWires(base->pos, base->size.x, base->size.y, base->size.z, base->tint);
+    }
+
+    for (int i = 0; i < group->modelRenderers->count; i++){
+        ModelRenderer* renderer = GetArrayItem(group->bases,i,Base);
+        Base* base = (Base*) GetEntityComponent(group->bases,Base,renderer->id);
+        DrawModel(renderer->model, base->pos, 1.f, base->tint);
+    }
+
+    IterateArray(group->modelRenderers, draw_group_entity_renderers);
     return group->entityCount;
 }

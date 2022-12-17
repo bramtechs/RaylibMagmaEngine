@@ -4,9 +4,11 @@
 #include "raymath.h"
 #include "window.h"
 #include "memory.h"
+#include "assets.h"
 #include "array.h"
 
 // poor man's ECS imitation, it's probably slow
+// TODO add dispose
 
 typedef void(*UPDATE_FUNC)(void*,float);
 typedef void(*DRAW_FUNC)(void*);
@@ -23,17 +25,22 @@ typedef struct {
 } Base;
 
 typedef struct {
+    EntityID id;
+    Model model;
+} ModelRenderer;
+
+typedef struct {
     EntityID entityCount; 
     Array* bases;
+    Array* modelRenderers;
 } EntityGroup;
 
 Base CreateBase(Vector3 pos, Color tint);
-
 Base CreateDefaultBase();
 
-Base CreateRandomBase();
+ModelRenderer CreateModelRenderer(const char* modelPath, Base *base);
 
-BoundingBox GetBaseBounds(Base base);
+BoundingBox GetBaseBounds(EntityID id);
 
 RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
@@ -44,8 +51,13 @@ EntityID AddEntity(EntityGroup* group);
 
 // nested macro's, seems like a good idea!
 #define AddEntityComponent(ARRAY_PTR, TYPE, DATA_PTR, ID) \
-    DATA_PTR->id = ID; \
+    (DATA_PTR)->id = ID; \
     PushArray(ARRAY_PTR,TYPE,DATA_PTR)
+
+void* GetEntityComponentRaw(Array* array, EntityID id);
+
+#define GetEntityComponent(ARRAY_PTR, TYPE, ID) \
+    (TYPE*) GetEntityComponentRaw(ARRAY_PTR,ID)
 
 size_t UpdateGroup(EntityGroup* group, float delta);
 
