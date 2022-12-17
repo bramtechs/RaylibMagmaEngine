@@ -1,5 +1,6 @@
 #include "entity.h"
 
+bool DrawOutlines = false;
 
 Base CreateBase(Vector3 pos, Color tint){
     return (Base) {
@@ -13,17 +14,11 @@ Base CreateDefaultBase(){
     };
 }
 
-ModelRenderer CreateModelRenderer(const char* modelPath, Base* base){
+ModelRenderer CreateModelRenderer(const char* modelPath){
     Model model = RequestModel(modelPath);
 
-    // offset the Base with the loaded geometry
-    BoundingBox box = GetModelBoundingBox(model);
-    base->pos = Vector3Subtract(base->pos,box.min);
-    base->size = Vector3Subtract(box.max,box.min);
-
     return (ModelRenderer) {
-        -1,
-        model
+        -1, model
     };
 }
 
@@ -91,23 +86,26 @@ size_t UpdateGroup(EntityGroup* group, float delta){
     return group->entityCount;
 }
 
-void draw_group_entity_renderers(int _, void* ptr){
-}
-
 size_t DrawGroup(EntityGroup* group){
     assert(group != NULL);
 
-    for (int i = 0; i < group->bases->count; i++){
-        Base* base = GetArrayItem(group->bases,i,Base);
-        DrawCubeWires(base->pos, base->size.x, base->size.y, base->size.z, base->tint);
+    if (DrawOutlines) {
+        for (int i = 0; i < group->bases->count; i++) {
+            Base* base = GetArrayItem(group->bases, i, Base);
+            DrawCubeWires(base->pos, base->size.x, base->size.y, base->size.z, base->tint);
+        }
     }
 
     for (int i = 0; i < group->modelRenderers->count; i++){
-        ModelRenderer* renderer = GetArrayItem(group->bases,i,Base);
+        ModelRenderer* renderer = GetArrayItem(group->modelRenderers,i,Base);
         Base* base = (Base*) GetEntityComponent(group->bases,Base,renderer->id);
         DrawModel(renderer->model, base->pos, 1.f, base->tint);
+
+        if (DrawOutlines) {
+			BoundingBox box = GetModelBoundingBox(renderer->model);
+			DrawBoundingBox(box, YELLOW);
+        }
     }
 
-    IterateArray(group->modelRenderers, draw_group_entity_renderers);
     return group->entityCount;
 }

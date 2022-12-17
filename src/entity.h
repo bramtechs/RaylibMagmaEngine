@@ -10,6 +10,8 @@
 // poor man's ECS imitation, it's probably slow
 // TODO add dispose
 
+extern bool DrawOutlines; // TODO replace
+
 typedef void(*UPDATE_FUNC)(void*,float);
 typedef void(*DRAW_FUNC)(void*);
 
@@ -38,7 +40,7 @@ typedef struct {
 Base CreateBase(Vector3 pos, Color tint);
 Base CreateDefaultBase();
 
-ModelRenderer CreateModelRenderer(const char* modelPath, Base *base);
+ModelRenderer CreateModelRenderer(const char* modelPath);
 
 BoundingBox GetBaseBounds(EntityID id);
 
