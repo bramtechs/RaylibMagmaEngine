@@ -38,21 +38,3 @@ void IterateArray(Array* array, ITER_FUNC func){
         (*func)(i,item);
     }
 }
-
-//void printItem(int i, void* ptr){
-//    int* number = (int*) ptr;
-//    INFO("%d",*number);
-//}
-
-void TestArrays(){
-    Array* arr = MakeArray(sizeof(int));
-
-    for (int i = 0; i < 666; i++) {
-        PushArray(arr,int,&i);
-    }
-
-    // print the things
-    IterateArray(arr,printItem);
-
-    INFO("arrays made");
-}

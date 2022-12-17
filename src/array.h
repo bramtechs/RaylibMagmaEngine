@@ -1,9 +1,11 @@
 #pragma once
 
+#include <stdio.h>
+#include <stdbool.h>
+#include "logger.h"
+#include "memory.h"
+
 // basically growing arrays
-
-#include "magma.h"
-
 typedef void(*ITER_FUNC)(int i, void*);
 
 typedef struct {
@@ -24,5 +26,3 @@ void* PushArrayRaw(Array* array, void* item);
 #define PushArray(ARRAY,TYPE, ITEM_PTR) (TYPE*) PushArrayRaw(ARRAY,ITEM_PTR)
 
 void IterateArray(Array* array, ITER_FUNC func);
-
-void TestArrays();

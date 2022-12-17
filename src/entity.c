@@ -2,13 +2,13 @@
 
 Base CreateBase(Vector3 pos, Color tint){
     return (Base) {
-        pos, Vector3One(), Vector3One(), tint
+        -1, pos, Vector3One(), Vector3One(), tint
     };
 }
 
 Base CreateDefaultBase(){
     return (Base) {
-        Vector3Zero(), Vector3One(), Vector3Zero(), WHITE
+        -1, Vector3Zero(), Vector3One(), Vector3Zero(), WHITE
     };
 }
 
@@ -34,6 +34,7 @@ Base CreateRandomBase(){
 BoundingBox GetBaseBounds(Base base){
     Vector3 halfSize = Vector3Scale(base.size, 0.5f);
     Vector3 startCorner = Vector3Subtract(base.pos, halfSize);
+
     return (BoundingBox) {
         startCorner,
         Vector3Add(startCorner,base.size)
@@ -58,85 +59,39 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
     return GetRayCollisionBase(base, ray);
 }
 
-EntityGroup* CreateEntityGroup(){
+EntityGroup* CreateEntityGroup() {
     EntityGroup *g = new(EntityGroup);
-    g->root = new(Entity);
+    g->entityCount = 0;
+    g->bases = MakeArray(sizeof(Base));
     return g;
 }
 
-// TODO horrible name
-void add_group_entity_child(Entity* root, void* data, size_t size, Components comps,
-                            UPDATE_FUNC updateFunc, DRAW_FUNC drawFunc){
-    assert(root != NULL);
-
-    if (root->next != NULL){
-        add_group_entity_child(root->next,data,size,comps,updateFunc,drawFunc);
-        return;
-    }
-
-    root->next = MemAlloc(sizeof(Entity));
-    root->next->components = comps;
-    root->next->updateFunc = updateFunc;
-    root->next->drawFunc = drawFunc;
-
-    root->next->content = MemAlloc(size);
-    memcpy(root->next->content,data,size);
-}
-
-void AddGroupEntity(EntityGroup* group, void* data, size_t size, Components comps,
-                    UPDATE_FUNC updateFunc, DRAW_FUNC drawFunc){
+EntityID AddEntity(EntityGroup* group){
     assert(group != NULL);
 
-    add_group_entity_child(group->root,data,size,comps,updateFunc,drawFunc);
+    EntityID id = group->entityCount;
+    group->entityCount++;
+    return id;
 }
 
-bool CheckEntityComponents(Entity* entity, Components filter){
-    return (entity->components & filter) > 0;
-}
-
-size_t PollEntities(EntityGroup* group, Components filter, POLL_FUNC func){
-    Entity *next = group->root->next;
-    size_t counter = 0;
-    while (next != NULL){
-        if (CheckEntityComponents(next,filter)){
-            if (func != NULL){
-                (*func)(*next,group);
-            }
-            counter ++;
-        }
-        next = next->next;
-    }
-    return counter;
+void update_group_entity(int i, void* ptr){
+    // TODO add velocity to position
 }
 
 size_t UpdateGroup(EntityGroup* group, float delta){
     assert(group != NULL);
 
-    Entity *next = group->root->next;
-    size_t counter = 0;
-    while (next != NULL){
-        UPDATE_FUNC func = next->updateFunc;
-        if (func != NULL){
-            (*func)(next->content,delta);
-        }
-        next = next->next;
-        counter ++;
-    }
-    return counter;
+    IterateArray(group->bases, update_group_entity);
+    return group->entityCount;
+}
+
+void draw_group_entity(int i, void* ptr){
+    // TODO draw bounding box
 }
 
 size_t DrawGroup(EntityGroup* group){
     assert(group != NULL);
 
-    Entity *next = group->root->next;
-    size_t counter = 0;
-    while (next != NULL){
-        DRAW_FUNC func = next->drawFunc;
-        if (func != NULL){
-            (*func)(next->content);
-        }
-        next = next->next;
-        counter++;
-    }
-    return counter;
+    IterateArray(group->bases, update_group_entity);
+    return group->entityCount;
 }

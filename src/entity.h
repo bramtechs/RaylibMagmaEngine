@@ -4,38 +4,28 @@
 #include "raymath.h"
 #include "window.h"
 #include "memory.h"
+#include "array.h"
 
-#define COMP_BASE (1 << 1)
+// poor man's ECS imitation, it's probably slow
 
 typedef void(*UPDATE_FUNC)(void*,float);
 typedef void(*DRAW_FUNC)(void*);
 
-typedef unsigned long Components;
-
-struct Entity;
-typedef struct Entity Entity;
-
-struct Entity {
-    Components components;
-    UPDATE_FUNC updateFunc;
-    DRAW_FUNC drawFunc;
-    Entity* next;
-    void* content;
-};
+typedef size_t EntityID;
 
 typedef struct {
-    Entity* root;
-} EntityGroup;
-
-typedef void(*POLL_FUNC)(Entity,EntityGroup* group);
-
-typedef struct {
+    EntityID id;
     Vector3 pos;
     Vector3 size;
     Vector3 rotation;
 
     Color tint;
 } Base;
+
+typedef struct {
+    EntityID entityCount; 
+    Array* bases;
+} EntityGroup;
 
 Base CreateBase(Vector3 pos, Color tint);
 
@@ -50,12 +40,12 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 
 EntityGroup* CreateEntityGroup();
 
-void AddGroupEntity(EntityGroup* group, void* data, size_t size, Components comps,
-                    UPDATE_FUNC updateFunc, DRAW_FUNC drawFunc);
+EntityID AddEntity(EntityGroup* group);
 
-bool CheckEntityComponents(Entity* entity, Components filter); // Checks if an entity has a tag/component
-
-size_t PollEntities(EntityGroup* group, Components filter, POLL_FUNC func);
+// nested macro's, seems like a good idea!
+#define AddEntityComponent(ARRAY_PTR, TYPE, DATA_PTR, ID) \
+    DATA_PTR->id = ID; \
+    PushArray(ARRAY_PTR,TYPE,DATA_PTR)
 
 size_t UpdateGroup(EntityGroup* group, float delta);
 
