@@ -9,7 +9,7 @@ Array* MakeArray(size_t itemSize){
     return array;
 }
 
-void* GetArrayItemPtr(Array* array, size_t index){
+void* GetArrayItemRaw(Array* array, size_t index){
     assert(array);
     assert (index < array->count);
 
@@ -18,7 +18,7 @@ void* GetArrayItemPtr(Array* array, size_t index){
 
 void* PushArrayRaw(Array* array, void* item){
     assert(array);
-    if (array->count > array->capacity){
+    if (array->count >= array->capacity){
         // resize the array!
         array->capacity *= 2;
         array->data = MemRealloc(array->data, array->capacity * array->itemSize);
@@ -32,12 +32,27 @@ void* PushArrayRaw(Array* array, void* item){
     return dest;
 }
 
+void IterateArray(Array* array, ITER_FUNC func){
+    for (int i = 0; i < array->count; i++){
+        void* item = (void *) &((char*) array->data)[i*array->itemSize];
+        (*func)(i,item);
+    }
+}
+
+//void printItem(int i, void* ptr){
+//    int* number = (int*) ptr;
+//    INFO("%d",*number);
+//}
+
 void TestArrays(){
     Array* arr = MakeArray(sizeof(int));
 
-    for (int i = 0; i < 1000; i++) {
-		PushArray(arr,int,&i);
+    for (int i = 0; i < 666; i++) {
+        PushArray(arr,int,&i);
     }
+
+    // print the things
+    IterateArray(arr,printItem);
 
     INFO("arrays made");
 }

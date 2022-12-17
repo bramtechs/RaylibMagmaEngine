@@ -15,12 +15,14 @@ typedef struct {
 
 Array* MakeArray(size_t itemSize);
 
-void* GetArrayItemPtr(Array* array, size_t index);
+void* GetArrayItemRaw(Array* array, size_t index);
 
 #define GetArrayItem(ARRAY,INDEX,TYPE) (TYPE*) GetArrayItemPtr(ARRAY,INDEX)
 
 void* PushArrayRaw(Array* array, void* item);
 
 #define PushArray(ARRAY,TYPE, ITEM_PTR) (TYPE*) PushArrayRaw(ARRAY,ITEM_PTR)
+
+void IterateArray(Array* array, ITER_FUNC func);
 
 void TestArrays();
