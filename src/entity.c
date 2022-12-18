@@ -14,9 +14,12 @@ Base CreateDefaultBase(){
     };
 }
 
-ModelRenderer CreateModelRenderer(const char* modelPath){
+ModelRenderer CreateModelRendererFromFile(const char* modelPath){
     Model model = RequestModel(modelPath);
+    return CreateModelRenderer(model);
+}
 
+ModelRenderer CreateModelRenderer(Model model){
     return (ModelRenderer) {
         -1, model
     };

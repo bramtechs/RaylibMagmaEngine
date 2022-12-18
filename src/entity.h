@@ -40,7 +40,8 @@ typedef struct {
 Base CreateBase(Vector3 pos, Color tint);
 Base CreateDefaultBase();
 
-ModelRenderer CreateModelRenderer(const char* modelPath);
+ModelRenderer CreateModelRendererFromFile(const char* modelPath);
+ModelRenderer CreateModelRenderer(Model model);
 
 BoundingBox GetBaseBounds(EntityID id);
 

@@ -6,12 +6,12 @@ static Assets* LoadedAssets = NULL;
 
 bool try_init_assets(const char* folder) {
     if (DirectoryExists(folder)) {
-		strcpy(LoadedAssets->folder,folder);
-	    INFO("Found assets at %s ...",folder);
-        return true;
+       strcpy(LoadedAssets->folder,folder);
+       INFO("Found assets at %s ...",folder);
+       return true;
     }
-	WARN("Did not find assets at %s, keep searching...",folder);
-	return false;
+    WARN("Did not find assets at %s, keep searching...",folder);
+    return false;
 }
 
 void InitAssets(const char* folder){
