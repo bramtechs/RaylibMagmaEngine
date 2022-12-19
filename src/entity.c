@@ -4,7 +4,7 @@ bool DrawOutlines = false;
 
 Base CreateBase(Vector3 pos, Color tint){
     return (Base) {
-        -1, pos, Vector3One(), Vector3One(), tint
+        -1, pos, Vector3One(), Vector3Zero(), tint
     };
 }
 
@@ -102,11 +102,15 @@ size_t DrawGroup(EntityGroup* group){
     for (int i = 0; i < group->modelRenderers->count; i++){
         ModelRenderer* renderer = GetArrayItem(group->modelRenderers,i,Base);
         Base* base = (Base*) GetEntityComponent(group->bases,Base,renderer->id);
-        DrawModel(renderer->model, base->pos, 1.f, base->tint);
+
+        Vector3 rotNorm = Vector3Normalize(base->rotation);
+        float rotAmount = Vector3Length(base->rotation);
+
+        DrawModelEx(renderer->model, base->pos, rotNorm, rotAmount, base->size, base->tint);
 
         if (DrawOutlines) {
-			BoundingBox box = GetModelBoundingBox(renderer->model);
-			DrawBoundingBox(box, YELLOW);
+            BoundingBox box = GetModelBoundingBox(renderer->model);
+            DrawBoundingBox(box, YELLOW);
         }
     }
 
