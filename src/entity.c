@@ -101,7 +101,7 @@ size_t DrawGroup(EntityGroup* group){
 
     for (int i = 0; i < group->modelRenderers->count; i++){
         ModelRenderer* renderer = GetArrayItem(group->modelRenderers,i,Base);
-        Base* base = (Base*) GetEntityComponent(group->bases,Base,renderer->id);
+        Base* base = GetEntityComponent(group->bases,Base,renderer->id);
 
         Vector3 rotNorm = Vector3Normalize(base->rotation);
         float rotAmount = Vector3Length(base->rotation);
