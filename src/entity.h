@@ -10,8 +10,6 @@
 // poor man's ECS imitation, it's probably slow
 // TODO add dispose
 
-extern bool DrawOutlines; // TODO replace
-
 typedef void(*UPDATE_FUNC)(void*,float);
 typedef void(*DRAW_FUNC)(void*);
 
@@ -49,6 +47,7 @@ RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 
 EntityGroup* CreateEntityGroup();
+void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!
 
 EntityID AddEntity(EntityGroup* group);
 

@@ -16,6 +16,7 @@ typedef struct {
 } Array;
 
 Array* MakeArray(size_t itemSize);
+void DisposeArray(Array* array);
 
 void* GetArrayItemRaw(Array* array, size_t index);
 

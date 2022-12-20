@@ -7,22 +7,20 @@
 
 #include "logger.h"
 #include "memory.h"
+#include "array.h"
 
 #define MAX_ASSETS 512 
 
 typedef struct {
-	char folder[128];
+    char folder[128];
 
-	Texture textures[MAX_ASSETS];
-	size_t textureCount;
-	Model models[MAX_ASSETS];
-	size_t modelCount;
+    Array* textures;
+    Array* texturePaths;
 
-} Assets;
-
+} GameAssets;
 
 void InitAssets(const char* folder);
-void UnloadAssets();
+void DisposeAssets();
 
 Texture RequestTexture(const char* name);
 Model RequestModel(const char* name);

@@ -116,3 +116,8 @@ size_t DrawGroup(EntityGroup* group){
 
     return group->entityCount;
 }
+
+void DisposeEntityGroup(EntityGroup *group){
+    DisposeArray(group->bases);
+    DisposeArray(group->modelRenderers);
+}

@@ -1,12 +1,10 @@
 #include "assets.h"
 
-// TODO way to complicated, don't
-
-static Assets* LoadedAssets = NULL;
+static GameAssets* Assets = NULL;
 
 bool try_init_assets(const char* folder) {
     if (DirectoryExists(folder)) {
-       strcpy(LoadedAssets->folder,folder);
+       strcpy(Assets->folder,folder);
        INFO("Found assets at %s ...",folder);
        return true;
     }
@@ -15,7 +13,9 @@ bool try_init_assets(const char* folder) {
 }
 
 void InitAssets(const char* folder){
-    LoadedAssets = new(Assets);
+    Assets = new(GameAssets);
+    Assets->textures = MakeArray(sizeof(Texture));
+    Assets->texturePaths = MakeArray(sizeof(char[128]));
 
     INFO("Loading assets...");
 
@@ -29,18 +29,29 @@ void InitAssets(const char* folder){
     }
 }
 
-void UnloadAssets(){
-    assert(LoadedAssets);
-    M_MemFree(LoadedAssets);
-    //INFO("Disposed assets!");
-    WARN("TODO dispose assets!");
+void dispose_texture(int i, void* ptr){
+    Texture* texture = (Texture*) ptr;
+    UnloadTexture(*texture);
 }
 
-#define REGISTER(X) LoadedAssets->X##s[LoadedAssets->X##Count] = X; \
-                    LoadedAssets->X##Count++
+void dispose_model(int i, void* ptr){
+    Model* model = (Model*) ptr;
+    UnloadModel(*model);
+}
+
+void DisposeAssets(){
+    assert(Assets);
+
+    IterateArray(Assets->textures, dispose_texture);
+
+    DisposeArray(Assets->textures);
+    DisposeArray(Assets->texturePaths);
+
+    M_MemFree(Assets);
+}
 
 Texture RequestTexture(const char* name) {
-    const char* path = TextFormat("%s/%s", LoadedAssets->folder, name);
+    const char* path = TextFormat("%s/%s", Assets->folder, name);
     Texture texture = LoadTexture(path);
     if (texture.width == 0) {
         // failed, generate temporary
@@ -48,16 +59,16 @@ Texture RequestTexture(const char* name) {
         texture = LoadTextureFromImage(temp);
         UnloadImage(temp);
     }
-    
-    REGISTER(texture);
-    LoadedAssets->textures[LoadedAssets->textureCount] = texture;
+    PushArray(Assets->textures,Texture,&texture);
     return texture;
 }
 
 Model RequestModel(const char* name) {
-    const char* path = TextFormat("%s/%s", LoadedAssets->folder, name);
+    const char* path = TextFormat("%s/%s", Assets->folder, name);
     Model model = LoadModel(path);
-    // raylib automatically handles not found
-    REGISTER(model);
+
+    // raylib automatically handles if model isn't found
+    // TODO memcopying models doesn't seem to work so you'll have to dispose these things manually for now
+
     return model;
 }

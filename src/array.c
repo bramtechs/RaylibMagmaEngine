@@ -9,6 +9,10 @@ Array* MakeArray(size_t itemSize){
     return array;
 }
 
+void DisposeArray(Array* array){
+   M_MemFree(array);
+}
+
 void* GetArrayItemRaw(Array* array, size_t index){
     assert(array);
     assert (index < array->count);
@@ -33,6 +37,7 @@ void* PushArrayRaw(Array* array, void* item){
 }
 
 void IterateArray(Array* array, ITER_FUNC func){
+    assert(array);
     for (int i = 0; i < array->count; i++){
         void* item = (void *) &((char*) array->data)[i*array->itemSize];
         (*func)(i,item);
