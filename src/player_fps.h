@@ -6,13 +6,17 @@
 
 typedef struct {
     Camera camera;
-    EntityID floorCasterID;
+    float eyeHeight;
 } PlayerFPS;
 
-PlayerFPS SpawnPlayerFPS(EntityGroup* group);
+PlayerFPS SpawnPlayerFPS(float eyeHeight);
 
 void SetPlayerFPSAngle(PlayerFPS *player, int lookAtDeg);
 void SetPlayerFPSFov(PlayerFPS *player, int fovDeg);
+
+Vector3 UpdatePlayerFPS(PlayerFPS* player, EntityGroup* group, float delta);
+
 void FocusPlayerFPS(PlayerFPS *player);
 void UnfocusPlayerFPS(PlayerFPS *player);
+
 void TeleportPlayerFPS(PlayerFPS *player, Vector3 position);

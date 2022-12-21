@@ -8,7 +8,6 @@
 #include "array.h"
 
 // poor man's ECS imitation, it's probably slow
-// TODO add dispose
 
 typedef void(*UPDATE_FUNC)(void*,float);
 typedef void(*DRAW_FUNC)(void*);
@@ -30,15 +29,9 @@ typedef struct {
 } ModelRenderer;
 
 typedef struct {
-    EntityID id; 
-    float yOffset;
-} FloorCaster;
-
-typedef struct {
     EntityID entityCount; 
     Array* bases;
     Array* modelRenderers;
-    Array* floorCasters;
 } EntityGroup;
 
 Base CreateBase(Vector3 pos, Color tint);
@@ -47,10 +40,9 @@ Base CreateDefaultBase();
 ModelRenderer CreateModelRendererFromFile(const char* modelPath);
 ModelRenderer CreateModelRenderer(Model model);
 
-FloorCaster CreateFloorCaster(float yOffset);
-
 BoundingBox GetBaseBounds(EntityID id);
 
+RayCollision GetRayCollisionModels(EntityGroup* groups, Ray ray);
 RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 

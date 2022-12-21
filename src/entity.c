@@ -25,13 +25,6 @@ ModelRenderer CreateModelRenderer(Model model){
     };
 }
 
-FloorCaster CreateFloorCaster(float yOffset){
-    return (FloorCaster){
-        -1,
-        yOffset
-    };
-}
-
 BoundingBox GetBaseBounds(Base base){
     Vector3 halfSize = Vector3Scale(base.size, 0.5f);
     Vector3 startCorner = Vector3Subtract(base.pos, halfSize);
@@ -40,6 +33,28 @@ BoundingBox GetBaseBounds(Base base){
         startCorner,
         Vector3Add(startCorner,base.size)
     };
+}
+
+// TODO rename to GetRayCollisionGroup
+RayCollision GetRayCollisionModels(EntityGroup* groups, Ray ray){
+    Array* models = groups->modelRenderers;
+
+    float closestDistance = 10000000;
+    RayCollision hit = { 0 };
+
+    for (int i = 0; i < models->count; i++){
+        ModelRenderer *render = GetArrayItem(models,i,ModelRenderer);
+        Model model = render->model;
+        for (int j = 0; j < model.meshCount; j++){
+            RayCollision col = GetRayCollisionMesh(ray, model.meshes[j], model.transform);
+            if (col.hit && col.distance < closestDistance){
+                closestDistance = col.distance;
+                hit = col;
+            }
+        }
+    }
+
+    return hit;
 }
 
 RayCollision GetRayCollisionBase(Base base, Ray ray){
@@ -65,7 +80,6 @@ EntityGroup* CreateEntityGroup() {
     g->entityCount = 0;
     g->bases = MakeArray(sizeof(Base));
     g->modelRenderers = MakeArray(sizeof(ModelRenderer));
-    g->floorCasters = MakeArray(sizeof(FloorCaster));
     return g;
 }
 
@@ -128,5 +142,4 @@ size_t DrawGroup(EntityGroup* group){
 void DisposeEntityGroup(EntityGroup *group){
     DisposeArray(group->bases);
     DisposeArray(group->modelRenderers);
-    DisposeArray(group->floorCasters);
 }
