@@ -30,9 +30,15 @@ typedef struct {
 } ModelRenderer;
 
 typedef struct {
+    EntityID id; 
+    float yOffset;
+} FloorCaster;
+
+typedef struct {
     EntityID entityCount; 
     Array* bases;
     Array* modelRenderers;
+    Array* floorCasters;
 } EntityGroup;
 
 Base CreateBase(Vector3 pos, Color tint);
@@ -40,6 +46,8 @@ Base CreateDefaultBase();
 
 ModelRenderer CreateModelRendererFromFile(const char* modelPath);
 ModelRenderer CreateModelRenderer(Model model);
+
+FloorCaster CreateFloorCaster(float yOffset);
 
 BoundingBox GetBaseBounds(EntityID id);
 

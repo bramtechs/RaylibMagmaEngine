@@ -25,6 +25,13 @@ ModelRenderer CreateModelRenderer(Model model){
     };
 }
 
+FloorCaster CreateFloorCaster(float yOffset){
+    return (FloorCaster){
+        -1,
+        yOffset
+    };
+}
+
 BoundingBox GetBaseBounds(Base base){
     Vector3 halfSize = Vector3Scale(base.size, 0.5f);
     Vector3 startCorner = Vector3Subtract(base.pos, halfSize);
@@ -58,6 +65,7 @@ EntityGroup* CreateEntityGroup() {
     g->entityCount = 0;
     g->bases = MakeArray(sizeof(Base));
     g->modelRenderers = MakeArray(sizeof(ModelRenderer));
+    g->floorCasters = MakeArray(sizeof(FloorCaster));
     return g;
 }
 
@@ -120,4 +128,5 @@ size_t DrawGroup(EntityGroup* group){
 void DisposeEntityGroup(EntityGroup *group){
     DisposeArray(group->bases);
     DisposeArray(group->modelRenderers);
+    DisposeArray(group->floorCasters);
 }

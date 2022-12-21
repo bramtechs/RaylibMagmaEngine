@@ -26,6 +26,8 @@ void InitMagmaWindow(int gameWidth, int gameHeight, int winWidth, int winHeight,
     SetWindowMinSize(winWidth/2,winHeight/2);
     //SetWindowPosition((GetMonitorWidth(0) - WIDTH * SCALE) / 2, (GetMonitorHeight(0) - HEIGHT * SCALE) / 2);
 
+    SetExitKey(KEY_DELETE);
+
     // Render texture initialization, used to hold the rendering result so we can easily resize it
     Win.renderTarget = LoadRenderTexture(gameWidth, gameHeight);
     SetTextureFilter(Win.renderTarget.texture, TEXTURE_FILTER_POINT);  // Texture scale filter to use

@@ -19,3 +19,4 @@
 #include "assets.h"
 #include "entity.h"
 #include "window.h"
+#include "player_fps.h"
