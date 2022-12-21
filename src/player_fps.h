@@ -7,6 +7,11 @@
 typedef struct {
     Camera camera;
     float eyeHeight;
+    bool isFocused;
+
+    float angle;
+    float tilt;
+
 } PlayerFPS;
 
 PlayerFPS SpawnPlayerFPS(float eyeHeight);
