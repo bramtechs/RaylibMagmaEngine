@@ -37,12 +37,12 @@ typedef struct {
 Base CreateBase(Vector3 pos, Color tint);
 Base CreateDefaultBase();
 
-ModelRenderer CreateModelRendererFromFile(const char* modelPath);
-ModelRenderer CreateModelRenderer(Model model);
+ModelRenderer CreateModelRendererFromFile(const char* modelPath, Base* base);
+ModelRenderer CreateModelRenderer(Model model, Base* base);
 
 BoundingBox GetBaseBounds(EntityID id);
 
-RayCollision GetRayCollisionModels(EntityGroup* groups, Ray ray);
+RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray);
 RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 
@@ -64,3 +64,5 @@ void* GetEntityComponentRaw(Array* array, EntityID id);
 size_t UpdateGroup(EntityGroup* group, float delta);
 
 size_t DrawGroup(EntityGroup* group);
+
+void DrawGroupOutlines(EntityGroup* group, Camera *camera);

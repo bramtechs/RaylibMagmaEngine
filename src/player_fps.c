@@ -41,7 +41,7 @@ Vector3 UpdatePlayerFPS(PlayerFPS* player, EntityGroup* group, float delta){
     ray.position = Vector3Add(player->camera.position,offset);
     ray.direction = (Vector3) {0,-1,0};
 
-    RayCollision col = GetRayCollisionModels(group, ray);
+    RayCollision col = GetRayCollisionGroup(group, ray);
 
     // move player to hit point
     Vector3 dest = Vector3Add(col.point, offset);
@@ -96,6 +96,7 @@ Vector3 UpdatePlayerFPS(PlayerFPS* player, EntityGroup* group, float delta){
 
 void FocusPlayerFPS(PlayerFPS *player){
     player->isFocused = true;
+    SetCameraMode(player->camera, CAMERA_CUSTOM);
 }
 
 void UnfocusPlayerFPS(PlayerFPS *player){

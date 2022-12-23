@@ -1,7 +1,5 @@
 #include "entity.h"
 
-bool DrawOutlines = false;
-
 Base CreateBase(Vector3 pos, Color tint){
     return (Base) {
         -1, pos, Vector3One(), Vector3Zero(), tint
@@ -14,29 +12,31 @@ Base CreateDefaultBase(){
     };
 }
 
-ModelRenderer CreateModelRendererFromFile(const char* modelPath){
+ModelRenderer CreateModelRendererFromFile(const char* modelPath, Base* base){
     Model model = RequestModel(modelPath);
-    return CreateModelRenderer(model);
+    return CreateModelRenderer(model, base);
 }
 
-ModelRenderer CreateModelRenderer(Model model){
+ModelRenderer CreateModelRenderer(Model model, Base* base){
+
+    // make the base big enough to hold the model
+    BoundingBox box = GetModelBoundingBox(model);
+    base->pos = box.min;
+    base->size = Vector3Subtract(box.max,box.min);
+
     return (ModelRenderer) {
         -1, model
     };
 }
 
 BoundingBox GetBaseBounds(Base base){
-    Vector3 halfSize = Vector3Scale(base.size, 0.5f);
-    Vector3 startCorner = Vector3Subtract(base.pos, halfSize);
-
     return (BoundingBox) {
-        startCorner,
-        Vector3Add(startCorner,base.size)
+        base.pos,
+        Vector3Add(base.pos,base.size)
     };
 }
 
-// TODO rename to GetRayCollisionGroup
-RayCollision GetRayCollisionModels(EntityGroup* groups, Ray ray){
+RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray){
     Array* models = groups->modelRenderers;
 
     float closestDistance = 10000000;
@@ -114,13 +114,6 @@ size_t UpdateGroup(EntityGroup* group, float delta){
 size_t DrawGroup(EntityGroup* group){
     assert(group != NULL);
 
-    if (DrawOutlines) {
-        for (int i = 0; i < group->bases->count; i++) {
-            Base* base = GetArrayItem(group->bases, i, Base);
-            DrawCubeWires(base->pos, base->size.x, base->size.y, base->size.z, base->tint);
-        }
-    }
-
     for (int i = 0; i < group->modelRenderers->count; i++){
         ModelRenderer* renderer = GetArrayItem(group->modelRenderers,i,Base);
         Base* base = GetEntityComponent(group->bases,Base,renderer->id);
@@ -128,15 +121,21 @@ size_t DrawGroup(EntityGroup* group){
         Vector3 rotNorm = Vector3Normalize(base->rotation);
         float rotAmount = Vector3Length(base->rotation);
 
-        DrawModelEx(renderer->model, base->pos, rotNorm, rotAmount, base->size, base->tint);
-
-        if (DrawOutlines) {
-            BoundingBox box = GetModelBoundingBox(renderer->model);
-            DrawBoundingBox(box, YELLOW);
-        }
+        BoundingBox box = GetModelBoundingBox(renderer->model);
+        DrawModelEx(renderer->model, Vector3Subtract(base->pos,box.min), rotNorm, rotAmount, Vector3One(), base->tint);
     }
 
     return group->entityCount;
+}
+
+void DrawGroupOutlines(EntityGroup* group, Camera *camera){
+    for (int i = 0; i < group->bases->count; i++) {
+        Base* base = GetArrayItem(group->bases, i, Base);
+
+        BoundingBox box = GetBaseBounds(*base);
+        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+        DrawBoundingBox(box, col.hit ? WHITE: GRAY);
+    }
 }
 
 void DisposeEntityGroup(EntityGroup *group){
