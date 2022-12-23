@@ -57,6 +57,22 @@ RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray){
     return hit;
 }
 
+bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
+    for (int i = 0; i < group->bases->count; i++) {
+        Base* base = GetArrayItem(group->bases, i, Base);
+
+        BoundingBox box = GetBaseBounds(*base);
+        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+
+        if (col.hit){
+            *result = base;
+            return true;
+        }
+    }
+    *result = NULL;
+    return false;
+}
+
 RayCollision GetRayCollisionBase(Base base, Ray ray){
     BoundingBox box = GetBaseBounds(base);
     return GetRayCollisionBox(ray, box);
@@ -134,7 +150,14 @@ void DrawGroupOutlines(EntityGroup* group, Camera *camera){
 
         BoundingBox box = GetBaseBounds(*base);
         RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-        DrawBoundingBox(box, col.hit ? WHITE: GRAY);
+        DrawBoundingBox(box, GRAY);
+    }
+
+    Base* picked = NULL;
+    if (GetMousePickedBase(group,camera,&picked)){
+        RayCollision col = GetMouseRayCollisionBase(*picked,*camera);
+        BoundingBox box = GetBaseBounds(*picked);
+        DrawBoundingBox(box, WHITE);
     }
 }
 
