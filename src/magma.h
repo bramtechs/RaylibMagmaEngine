@@ -10,8 +10,9 @@
 #include "raymath.h"
 
 // small quality of life stuff 
-#include "math.h"
+#include "math_custom.h"
 #include "array.h"
+#include "list.h"
 #include "memory.h"
 #include "logger.h"
 

@@ -57,22 +57,6 @@ RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray){
     return hit;
 }
 
-bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
-    for (int i = 0; i < group->bases->count; i++) {
-        Base* base = GetArrayItem(group->bases, i, Base);
-
-        BoundingBox box = GetBaseBounds(*base);
-        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-
-        if (col.hit){
-            *result = base;
-            return true;
-        }
-    }
-    *result = NULL;
-    return false;
-}
-
 RayCollision GetRayCollisionBase(Base base, Ray ray){
     BoundingBox box = GetBaseBounds(base);
     return GetRayCollisionBox(ray, box);
@@ -91,12 +75,45 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
     return GetRayCollisionBase(base, ray);
 }
 
+bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
+    for (int i = 0; i < group->bases->count; i++) {
+        Base* base = GetArrayItem(group->bases, i, Base);
+
+        BoundingBox box = GetBaseBounds(*base);
+        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+
+        if (col.hit){
+            *result = base;
+            return true;
+        }
+    }
+    *result = NULL;
+    return false;
+}
+
 EntityGroup* CreateEntityGroup() {
     EntityGroup *g = new(EntityGroup);
     g->entityCount = 0;
     g->bases = MakeArray(sizeof(Base));
     g->modelRenderers = MakeArray(sizeof(ModelRenderer));
     return g;
+}
+
+void DisposeEntityGroup(EntityGroup *group){
+    DisposeArray(group->bases);
+    DisposeArray(group->modelRenderers);
+}
+
+//typedef struct {
+//    
+//} SavedEntityGroup;
+//
+EntityGroup* ImportEntityGroup(EntityGroup* group, const char* fileName){
+
+}
+
+void ExportEntityGroup(EntityGroup* group, const char* fileName){
+
 }
 
 EntityID AddEntity(EntityGroup* group){
@@ -130,6 +147,7 @@ size_t UpdateGroup(EntityGroup* group, float delta){
 size_t DrawGroup(EntityGroup* group){
     assert(group != NULL);
 
+    // draw modelrenderers
     for (int i = 0; i < group->modelRenderers->count; i++){
         ModelRenderer* renderer = GetArrayItem(group->modelRenderers,i,Base);
         Base* base = GetEntityComponent(group->bases,Base,renderer->id);
@@ -159,9 +177,4 @@ void DrawGroupOutlines(EntityGroup* group, Camera *camera){
         BoundingBox box = GetBaseBounds(*picked);
         DrawBoundingBox(box, WHITE);
     }
-}
-
-void DisposeEntityGroup(EntityGroup *group){
-    DisposeArray(group->bases);
-    DisposeArray(group->modelRenderers);
 }

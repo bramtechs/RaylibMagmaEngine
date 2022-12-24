@@ -51,6 +51,9 @@ bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result);
 EntityGroup* CreateEntityGroup();
 void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!
 
+EntityGroup* ImportEntityGroup(EntityGroup* group, const char* fileName);
+void ExportEntityGroup(EntityGroup* group, const char* fileName);
+
 EntityID AddEntity(EntityGroup* group);
 
 // nested macro's, seems like a good idea!
@@ -66,5 +69,4 @@ void* GetEntityComponentRaw(Array* array, EntityID id);
 size_t UpdateGroup(EntityGroup* group, float delta);
 
 size_t DrawGroup(EntityGroup* group);
-
 void DrawGroupOutlines(EntityGroup* group, Camera *camera);
