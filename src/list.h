@@ -22,14 +22,15 @@
 typedef unsigned int ItemType;
 
 typedef struct {
-    bool continues;
     size_t size;
     ItemType type;
 } ListItem;
 
 typedef struct {
-    void* data;
-    size_t dataSize;
+    char* data;
+    size_t capacity; // in bytes
+    size_t size; // in bytes
+    size_t count; // number of items 
 } List;
 
 List* MakeList();
