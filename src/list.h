@@ -33,8 +33,18 @@ typedef struct {
     size_t count; // number of items 
 } List;
 
+typedef struct {
+    List* list;
+    ListItem* current;
+    size_t curIndex;
+} ListIterator;
+
 List* MakeList();
+void DisposeList(List* list);
 void PushListRaw(List* list, void* data, size_t size, ItemType type);
+
+ListIterator IterateListItems(List* list);
+bool IterateNextItem(ListIterator* it, ItemType *type, void* result);
 
 List* ImportList(const char* fileName);
 void ExportList(List* list, const char* fileName);
