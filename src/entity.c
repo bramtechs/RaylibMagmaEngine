@@ -179,7 +179,7 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
                         Base* base = (Base*) compPtr;
                         BoundingBox box = GetBaseBounds(*base);
                         RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-                        DrawBoundingBox(box, GRAY);
+                        DrawBoundingBox(box, col.hit ? WHITE:GRAY);
                     }
                 } break;
             default:
