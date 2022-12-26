@@ -3,7 +3,7 @@
 List* MakeList(){
     List *list = new(List);
 
-    list->capacity = 100000;
+    list->capacity = 1000;
     list->data = M_MemAlloc(list->capacity);
 
     return list;
@@ -28,6 +28,7 @@ void PushListRaw(List* list, void* data, size_t size, ItemType type){
 
     ListItem* newItem = (ListItem*) (list->data + list->size);
     newItem->size = size;
+    newItem->type = type;
     char* target = (char*) newItem + sizeof(ListItem);
     memcpy(target, data, size);
     list->size += sizeof(ListItem) + size;
