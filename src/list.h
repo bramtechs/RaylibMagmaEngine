@@ -19,7 +19,7 @@
 //      | RAW
 //  ......etc....
 
-typedef unsigned int ItemType;
+typedef int ItemType;
 
 typedef struct {
     size_t size;
@@ -37,14 +37,17 @@ typedef struct {
     List* list;
     ListItem* current;
     size_t curIndex;
+    ItemType filter;
 } ListIterator;
 
 List* MakeList();
 void DisposeList(List* list);
-void PushListRaw(List* list, void* data, size_t size, ItemType type);
+void PushList(List* list, void* data, size_t size, ItemType type);
 
 ListIterator IterateListItems(List* list);
-bool IterateNextItem(ListIterator* it, ItemType *type, void* result);
+ListIterator IterateListItemsEx(List* list, ItemType filter);
+bool IterateNextItem(ListIterator* it, void** result);
+bool IterateNextItemEx(ListIterator* it, ItemType *type, void** result);
 
 List* ImportList(const char* fileName);
 void ExportList(List* list, const char* fileName);

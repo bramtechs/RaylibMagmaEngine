@@ -2,12 +2,16 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "list.h"
 #include "window.h"
 #include "memory.h"
 #include "assets.h"
-#include "array.h"
 
 // poor man's ECS imitation, it's probably slow
+
+#define COMP_ALL                0
+#define COMP_BASE               1
+#define COMP_MODEL_RENDERER     2
 
 typedef void(*UPDATE_FUNC)(void*,float);
 typedef void(*DRAW_FUNC)(void*);
@@ -29,9 +33,8 @@ typedef struct {
 } ModelRenderer;
 
 typedef struct {
-    EntityID entityCount; 
-    Array* bases;
-    Array* modelRenderers;
+    size_t entityCount; 
+    List* components;
 } EntityGroup;
 
 Base CreateBase(Vector3 pos, Color tint);
@@ -56,17 +59,10 @@ void ExportEntityGroup(EntityGroup* group, const char* fileName);
 
 EntityID AddEntity(EntityGroup* group);
 
-// nested macro's, seems like a good idea!
-#define AddEntityComponent(ARRAY_PTR, TYPE, DATA_PTR, ID) \
-    (DATA_PTR)->id = ID; \
-    PushArray(ARRAY_PTR,TYPE,DATA_PTR)
+void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size, EntityID id);
 
-void* GetEntityComponentRaw(Array* array, EntityID id);
-
-#define GetEntityComponent(ARRAY_PTR, TYPE, ID) \
-    (TYPE*) GetEntityComponentRaw(ARRAY_PTR,ID)
+void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter);
 
 size_t UpdateGroup(EntityGroup* group, float delta);
 
-size_t DrawGroup(EntityGroup* group);
-void DrawGroupOutlines(EntityGroup* group, Camera *camera);
+size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines);

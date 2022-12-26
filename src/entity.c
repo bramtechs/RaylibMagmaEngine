@@ -36,14 +36,15 @@ BoundingBox GetBaseBounds(Base base){
     };
 }
 
-RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray){
-    Array* models = groups->modelRenderers;
+RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
+    ListIterator it = IterateListItemsEx(group->components,COMP_MODEL_RENDERER);
 
     float closestDistance = 10000000;
     RayCollision hit = { 0 };
 
-    for (int i = 0; i < models->count; i++){
-        ModelRenderer *render = GetArrayItem(models,i,ModelRenderer);
+    void* renderPtr = NULL;
+    while (IterateNextItem(&it,&renderPtr)){
+        ModelRenderer *render = (ModelRenderer*) renderPtr;
         Model model = render->model;
         for (int j = 0; j < model.meshCount; j++){
             RayCollision col = GetRayCollisionMesh(ray, model.meshes[j], model.transform);
@@ -76,8 +77,11 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
 }
 
 bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
-    for (int i = 0; i < group->bases->count; i++) {
-        Base* base = GetArrayItem(group->bases, i, Base);
+    ListIterator it = IterateListItemsEx(group->components,COMP_BASE);
+
+    void* basePtr = NULL;
+    while (IterateNextItem(&it, &basePtr)){
+        Base* base = (Base*) basePtr;
 
         BoundingBox box = GetBaseBounds(*base);
         RayCollision col = GetMouseRayCollisionBase(*base,*camera);
@@ -94,26 +98,20 @@ bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
 EntityGroup* CreateEntityGroup() {
     EntityGroup *g = new(EntityGroup);
     g->entityCount = 0;
-    g->bases = MakeArray(sizeof(Base));
-    g->modelRenderers = MakeArray(sizeof(ModelRenderer));
+    g->components = MakeList();
     return g;
 }
 
 void DisposeEntityGroup(EntityGroup *group){
-    DisposeArray(group->bases);
-    DisposeArray(group->modelRenderers);
+    // TODO
 }
 
-//typedef struct {
-//    
-//} SavedEntityGroup;
-//
 EntityGroup* ImportEntityGroup(EntityGroup* group, const char* fileName){
-
+    // TODO
 }
 
 void ExportEntityGroup(EntityGroup* group, const char* fileName){
-
+    // TODO
 }
 
 EntityID AddEntity(EntityGroup* group){
@@ -124,13 +122,20 @@ EntityID AddEntity(EntityGroup* group){
     return id;
 }
 
-void* GetEntityComponentRaw(Array* array, EntityID id){
-    for(int i = 0; i < array->count; i++){
-        void* data = GetArrayItemRaw(array,i);
+void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size, EntityID id){
+    data = id; // TODO unsafe cast
+    PushList(group->components,data,size,type);
+}
+
+void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter){
+    ListIterator it = IterateListItemsEx(group->components,filter);
+
+    void* dataPtr = NULL;
+    while (IterateNextItem(&it,&dataPtr)){
         // TODO dirty hack 
-        EntityID otherId = *((EntityID*) data);
+        EntityID otherId = *((EntityID*) dataPtr);
         if (otherId == id){
-            return data;
+            return dataPtr;
         }
     }
     return NULL;
@@ -144,32 +149,48 @@ size_t UpdateGroup(EntityGroup* group, float delta){
     return group->entityCount;
 }
 
-size_t DrawGroup(EntityGroup* group){
+size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
     assert(group != NULL);
 
-    // draw modelrenderers
-    for (int i = 0; i < group->modelRenderers->count; i++){
-        ModelRenderer* renderer = GetArrayItem(group->modelRenderers,i,Base);
-        Base* base = GetEntityComponent(group->bases,Base,renderer->id);
+    ListIterator it = IterateListItems(group->components);
 
-        Vector3 rotNorm = Vector3Normalize(base->rotation);
-        float rotAmount = Vector3Length(base->rotation);
+    void* compPtr = NULL;
+    ItemType type = { 0 };
+    while (IterateNextItemEx(&it,&type,&compPtr)){
+        switch (type){
+            case COMP_MODEL_RENDERER:
+                {
+                    // draw modelrenderers
+                    ModelRenderer* renderer = (ModelRenderer*) compPtr;
+                    Base* base = GetEntityComponent(group,renderer->id,COMP_BASE);
 
-        BoundingBox box = GetModelBoundingBox(renderer->model);
-        DrawModelEx(renderer->model, Vector3Subtract(base->pos,box.min), rotNorm, rotAmount, Vector3One(), base->tint);
+                    if (base == NULL){
+                        assert(false); // model renderer has no base! TODO shouldn't crash
+                    }
+
+                    Vector3 rotNorm = Vector3Normalize(base->rotation);
+                    float rotAmount = Vector3Length(base->rotation);
+
+                    BoundingBox box = GetModelBoundingBox(renderer->model);
+                    DrawModelEx(renderer->model, Vector3Subtract(base->pos,box.min), rotNorm, rotAmount, Vector3One(), base->tint);
+                } break;
+            case COMP_BASE:
+                {
+                    if (drawOutlines){
+                        Base* base = (Base*) compPtr;
+                        BoundingBox box = GetBaseBounds(*base);
+                        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+                        DrawBoundingBox(box, GRAY);
+                    }
+                } break;
+            default:
+                break;
+        }
     }
-
     return group->entityCount;
 }
 
 void DrawGroupOutlines(EntityGroup* group, Camera *camera){
-    for (int i = 0; i < group->bases->count; i++) {
-        Base* base = GetArrayItem(group->bases, i, Base);
-
-        BoundingBox box = GetBaseBounds(*base);
-        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-        DrawBoundingBox(box, GRAY);
-    }
 
     Base* picked = NULL;
     if (GetMousePickedBase(group,camera,&picked)){

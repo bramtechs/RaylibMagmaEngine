@@ -14,7 +14,7 @@ void DisposeList(List* list){
     M_MemFree(list);
 }
 
-void PushListRaw(List* list, void* data, size_t size, ItemType type){
+void PushList(List* list, void* data, size_t size, ItemType type){
     assert(list->data);
 
     // make sure action has enough memory
@@ -37,30 +37,34 @@ void PushListRaw(List* list, void* data, size_t size, ItemType type){
 
 ListIterator IterateListItems(List* list){
     assert(list);
-
-    ListItem* item = NULL;
-    if (list->count > 0){
-        item = (ListItem*) list->data;
-    }
-
+    ListItem* item = list->data;
     return (ListIterator) {
         list,
         item,
         0,
+        -1
     };
 }
 
-bool IterateNextItem(ListIterator* it, ItemType* type, void** result){
+ListIterator IterateListItemsEx(List* list, ItemType filter){
+    ListIterator it = IterateListItems(list);
+    it.filter = filter;
+    return it;
+}
+
+bool IterateNextItemEx(ListIterator* it, ItemType* type, void** result){
     List* list = it->list;
 
     if (it->current == NULL){
         return false; // list is empty, do nothing
     }
 
-    if (it->curIndex < list->count){
+    while (it->curIndex < list->count){
         // get cur item data
         ListItem* curItem = it->current;
-        *type = curItem->type;
+        if (type != NULL){
+            *type = curItem->type;
+        }
 
         char* curItemPtr = curItem;
         *result = (void*) (curItemPtr + sizeof(ListItem));
@@ -70,24 +74,30 @@ bool IterateNextItem(ListIterator* it, ItemType* type, void** result){
         it->current = (ListItem*) nextItemPtr;
 
         it->curIndex++;
-        return true;
+
+        if (it->filter == -1 || it->filter == curItem->type){
+            return true;
+        }
     }
 
     return false; // reached end of list
 }
 
+bool IterateNextItem(ListIterator* it, void** result){
+    IterateNextItem(it,NULL,result);
+}
 void TestList(){
     List* list = MakeList();
 
     for (int i = 0; i < 500; i++){
         int intNumber = i;
-        PushListRaw(list,&intNumber,sizeof(int),0);
+        PushList(list,&intNumber,sizeof(int),0);
         printf("--> %d\n",intNumber);
     }
 
     for (int i = 0; i < 500; i++){
         long longNumber = 1000000000 + i;
-        PushListRaw(list,&longNumber,sizeof(long),1);
+        PushList(list,&longNumber,sizeof(long),1);
         printf("--> %d\n",longNumber);
     }
 
