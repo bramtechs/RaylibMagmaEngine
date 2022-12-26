@@ -1,23 +1,23 @@
 #include "entity.h"
 
-Base CreateBase(Vector3 pos, Color tint){
+Base CreateBase(EntityID id, Vector3 pos, Color tint){
     return (Base) {
-        -1, pos, Vector3One(), Vector3Zero(), tint
+        id, pos, Vector3One(), Vector3Zero(), tint
     };
 }
 
-Base CreateDefaultBase(){
+Base CreateDefaultBase(EntityID id){
     return (Base) {
-        -1, Vector3Zero(), Vector3One(), Vector3Zero(), WHITE
+        id, Vector3Zero(), Vector3One(), Vector3Zero(), WHITE
     };
 }
 
-ModelRenderer CreateModelRendererFromFile(const char* modelPath, Base* base){
+ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base){
     Model model = RequestModel(modelPath);
-    return CreateModelRenderer(model, base);
+    return CreateModelRenderer(id, model, base);
 }
 
-ModelRenderer CreateModelRenderer(Model model, Base* base){
+ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base){
 
     // make the base big enough to hold the model
     BoundingBox box = GetModelBoundingBox(model);
@@ -25,7 +25,7 @@ ModelRenderer CreateModelRenderer(Model model, Base* base){
     base->size = Vector3Subtract(box.max,box.min);
 
     return (ModelRenderer) {
-        -1, model
+        id, model
     };
 }
 
@@ -122,8 +122,7 @@ EntityID AddEntity(EntityGroup* group){
     return id;
 }
 
-void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size, EntityID id){
-    data = id; // TODO unsafe cast
+void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size) {
     PushList(group->components,data,size,type);
 }
 

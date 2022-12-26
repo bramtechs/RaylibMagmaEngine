@@ -16,6 +16,7 @@ void DisposeList(List* list){
 
 void PushList(List* list, void* data, size_t size, ItemType type){
     assert(list->data);
+    assert(data);
 
     // make sure action has enough memory
     size_t expectedSize = list->size + sizeof(ListItem) + size;
@@ -84,7 +85,7 @@ bool IterateNextItemEx(ListIterator* it, ItemType* type, void** result){
 }
 
 bool IterateNextItem(ListIterator* it, void** result){
-    IterateNextItem(it,NULL,result);
+    IterateNextItemEx(it,NULL,result);
 }
 void TestList(){
     List* list = MakeList();

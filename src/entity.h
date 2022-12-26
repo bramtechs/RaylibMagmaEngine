@@ -37,11 +37,11 @@ typedef struct {
     List* components;
 } EntityGroup;
 
-Base CreateBase(Vector3 pos, Color tint);
-Base CreateDefaultBase();
+Base CreateBase(EntityID id, Vector3 pos, Color tint);
+Base CreateDefaultBase(EntityID id);
 
-ModelRenderer CreateModelRendererFromFile(const char* modelPath, Base* base);
-ModelRenderer CreateModelRenderer(Model model, Base* base);
+ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base);
+ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base);
 
 BoundingBox GetBaseBounds(EntityID id);
 
@@ -59,7 +59,7 @@ void ExportEntityGroup(EntityGroup* group, const char* fileName);
 
 EntityID AddEntity(EntityGroup* group);
 
-void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size, EntityID id);
+void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size);
 
 void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter);
 
