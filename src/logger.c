@@ -1,6 +1,6 @@
 #include "logger.h"
 
-static LogBuffer Buffer;
+static LogBuffer Buffer = { 0 };
 
 void LoggerLog(TraceLogLevel level, const char* text){
     Buffer.levels[Buffer.count] = level;
