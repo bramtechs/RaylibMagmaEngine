@@ -72,3 +72,13 @@ Model RequestModel(const char* name) {
 
     return model;
 }
+
+FilePathList IndexModels(const char* folder){
+    const char* path = TextFormat("%s/%s", Assets->folder, folder);
+
+    INFO("Indexing %s for models", path);
+    FilePathList list =  LoadDirectoryFilesEx(path, ".fbx", true);
+    INFO("Indexed %d models",list.count);
+    // TODO dispose
+    return list;
+}

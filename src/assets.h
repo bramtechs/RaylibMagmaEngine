@@ -24,3 +24,5 @@ void DisposeAssets();
 
 Texture RequestTexture(const char* name);
 Model RequestModel(const char* name);
+
+FilePathList IndexModels(const char* folder);
