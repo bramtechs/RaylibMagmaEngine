@@ -86,10 +86,9 @@ Vector3 UpdatePlayerFPS(PlayerFPS* player, EntityGroup* group, float delta){
         player->camera.target = Vector3Add(player->camera.position,angle);
     }
     
-    DrawText(TextFormat("%f\n%f\n\n%f\n%f\n%f horizontal movement not implemented lmao",player->angle,player->tilt,
-                                                                           player->camera.position.x,
-                                                                           player->camera.position.y,
-                                                                           player->camera.position.z),50,50,8,GREEN);
+    // DrawText(TextFormat("%f\n%f\n\n%f\n%f\n%f horizontal movement not implemented lmao",player->angle,player->tilt,
+    //                                                                        player->camera.position.x,
+    //                                                                        player->camera.position.y,
 
     return col.point;
 }

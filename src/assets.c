@@ -77,7 +77,10 @@ FilePathList IndexModels(const char* folder){
     const char* path = TextFormat("%s/%s", Assets->folder, folder);
 
     INFO("Indexing %s for models", path);
-    FilePathList list =  LoadDirectoryFilesEx(path, ".fbx", true);
+    FilePathList list =  LoadDirectoryFilesEx(path, ".obj", true);
+    for (int i = 0; i < list.count; i++){
+        DEBUG(">>> %s",list.paths[i]);
+    }
     INFO("Indexed %d models",list.count);
     // TODO dispose
     return list;
