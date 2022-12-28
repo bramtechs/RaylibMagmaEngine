@@ -43,13 +43,14 @@ Base CreateDefaultBase(EntityID id);
 ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base);
 ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base);
 
-BoundingBox GetBaseBounds(EntityID id);
+BoundingBox GetBaseBounds(Base base);
 
 RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray);
 RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 
 bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result);
+bool GetMousePickedBaseEx(EntityGroup* group, Camera* camera, Base** result, RayCollision* col);
 
 EntityGroup* CreateEntityGroup();
 void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!

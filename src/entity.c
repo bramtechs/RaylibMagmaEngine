@@ -77,6 +77,11 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
 }
 
 bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
+    RayCollision* col = NULL;
+    return GetMousePickedBaseEx(group,camera,result,&col);
+}
+
+bool GetMousePickedBaseEx(EntityGroup* group, Camera* camera, Base** result, RayCollision* col){
     ListIterator it = IterateListItemsEx(group->components,COMP_BASE);
 
     void* basePtr = NULL;
@@ -84,16 +89,18 @@ bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
         Base* base = (Base*) basePtr;
 
         BoundingBox box = GetBaseBounds(*base);
-        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+        RayCollision rayCol = GetMouseRayCollisionBase(*base,*camera);
 
-        if (col.hit){
+        if (rayCol.hit){
             *result = base;
+            *col = rayCol;
             return true;
         }
     }
     *result = NULL;
     return false;
 }
+
 
 EntityGroup* CreateEntityGroup() {
     EntityGroup *g = new(EntityGroup);

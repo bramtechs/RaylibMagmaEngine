@@ -44,8 +44,8 @@ Vector3 UpdatePlayerFPS(PlayerFPS* player, EntityGroup* group, float delta){
     RayCollision col = GetRayCollisionGroup(group, ray);
 
     // move player to hit point
-    Vector3 dest = Vector3Add(col.point, offset);
-    player->camera.position = dest;
+    player->feet = Vector3Add(col.point, offset);
+    player->camera.position = player->feet;
     
     if (player->isFocused) {
 

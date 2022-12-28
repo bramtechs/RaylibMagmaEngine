@@ -12,6 +12,7 @@ typedef struct {
     float angle;
     float tilt;
 
+    Vector3 feet;
 } PlayerFPS;
 
 PlayerFPS SpawnPlayerFPS(float eyeHeight);
