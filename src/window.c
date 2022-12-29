@@ -24,7 +24,8 @@ void InitMagmaWindow(int gameWidth, int gameHeight, int winWidth, int winHeight,
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(gameWidth,gameHeight,title);
     SetWindowMinSize(winWidth/2,winHeight/2);
-    //SetWindowPosition((GetMonitorWidth(0) - WIDTH * SCALE) / 2, (GetMonitorHeight(0) - HEIGHT * SCALE) / 2);
+    SetWindowPosition((GetMonitorWidth(0) - winWidth) / 2, (GetMonitorHeight(0) - winHeight) / 2);
+    SetWindowSize(winWidth,winHeight);
 
     SetExitKey(KEY_DELETE);
 

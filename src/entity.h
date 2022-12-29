@@ -49,8 +49,8 @@ RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray);
 RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 
-bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result);
-bool GetMousePickedBaseEx(EntityGroup* group, Camera* camera, Base** result, RayCollision* col);
+bool GetMousePickedBase(EntityGroup* group, Camera camera, Base** result);
+bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayCollision* col);
 
 EntityGroup* CreateEntityGroup();
 void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!

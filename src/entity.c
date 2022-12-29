@@ -76,12 +76,12 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
     return GetRayCollisionBase(base, ray);
 }
 
-bool GetMousePickedBase(EntityGroup* group, Camera* camera, Base** result){
-    RayCollision* col = NULL;
+bool GetMousePickedBase(EntityGroup* group, Camera camera, Base** result){
+    RayCollision col = { 0 };
     return GetMousePickedBaseEx(group,camera,result,&col);
 }
 
-bool GetMousePickedBaseEx(EntityGroup* group, Camera* camera, Base** result, RayCollision* col){
+bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayCollision* col){
     ListIterator it = IterateListItemsEx(group->components,COMP_BASE);
 
     void* basePtr = NULL;
@@ -89,7 +89,7 @@ bool GetMousePickedBaseEx(EntityGroup* group, Camera* camera, Base** result, Ray
         Base* base = (Base*) basePtr;
 
         BoundingBox box = GetBaseBounds(*base);
-        RayCollision rayCol = GetMouseRayCollisionBase(*base,*camera);
+        RayCollision rayCol = GetMouseRayCollisionBase(*base,camera);
 
         if (rayCol.hit){
             *result = base;
@@ -196,11 +196,11 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
     return group->entityCount;
 }
 
-void DrawGroupOutlines(EntityGroup* group, Camera *camera){
+void DrawGroupOutlines(EntityGroup* group, Camera camera){
 
     Base* picked = NULL;
     if (GetMousePickedBase(group,camera,&picked)){
-        RayCollision col = GetMouseRayCollisionBase(*picked,*camera);
+        RayCollision col = GetMouseRayCollisionBase(*picked,camera);
         BoundingBox box = GetBaseBounds(*picked);
         DrawBoundingBox(box, WHITE);
     }
