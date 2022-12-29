@@ -33,6 +33,7 @@ typedef struct {
     EntityID id;
     Model model;
     bool accurate;
+    Vector3 offset; // from base center
 } ModelRenderer;
 
 typedef struct {
@@ -48,9 +49,9 @@ void TranslateBase(Base* base, Vector3 offset);
 #define TranslateBaseY(BASE_PTR,Y) TranslateBase(BASE_PTR, (Vector3) {0.f,Y,0.f})
 #define TranslateBaseZ(BASE_PTR,Z) TranslateBase(BASE_PTR, (Vector3) {0.f,0.f,Z})
 #define TranslateBaseXYZ(BASE_PTR,X,Y,Z) TranslateBase(BASE_PTR, (Vector3) {X,Y,Z})
-#define TranslateBaseZero(BASE_PTR) TranslateBase(BASE_PTR, Vector3Zero())
 
 void SetBaseCenter(Base* base, Vector3 pos);
+#define ResetBaseTranslation(BASE_PTR) SetBaseCenter(BASE_PTR, Vector3Zero())
 
 ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base);
 ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base);

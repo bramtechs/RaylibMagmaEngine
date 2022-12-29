@@ -29,13 +29,21 @@ ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Ba
 ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base){
 
     // make the base big enough to hold the model
-    BoundingBox box = GetModelBoundingBox(model);
-    base->bounds.min = Vector3Add(base->bounds.min, box.min);
-    base->bounds.max = Vector3Add(base->bounds.max, box.max);
+    BoundingBox modelBox = GetModelBoundingBox(model);
+    
+    Vector3 size = Vector3Subtract(modelBox.max, modelBox.min);
+    base->bounds.max = Vector3Add(base->bounds.min,size);
 
-    return (ModelRenderer) {
-        id, model, false
-    };
+    Vector3 modelCenter = Vector3Add(modelBox.min,Vector3Scale(size,0.5f));
+    Vector3 offset = Vector3Subtract(base->center,modelCenter);
+
+    ModelRenderer render;
+    render.id = id;
+    render.model = model;
+    render.accurate = false;
+    render.offset = offset;
+
+    return render;
 }
 
 RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
@@ -56,7 +64,7 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
                     hit = col;
                 }
             }
-        }else{ // do bounds collision
+        } else { // do bounds collision
             Base* base = GetEntityComponent(group,render->id,COMP_BASE);
             RayCollision col = GetRayCollisionBox(ray,base->bounds);
             if (col.hit && col.distance < closestDistance){
@@ -195,15 +203,15 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
                         assert(false); // model renderer has no base! TODO shouldn't crash
                     }
 
-                    DrawModelEx(renderer->model, base->center, Vector3Zero(), 0, Vector3One(), base->tint);
+                    DrawModelEx(renderer->model, Vector3Add(base->center,renderer->offset), Vector3Zero(), 0, Vector3One(), base->tint);
                 } break;
             case COMP_BASE:
                 {
-                    if (drawOutlines){
-                        Base* base = (Base*) compPtr;
-                        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-                        DrawBoundingBox(base->bounds, col.hit ? WHITE:GRAY);
-                    }
+                    Base* base = (Base*) compPtr;
+                    RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+                    Color tint = col.hit ? WHITE:GRAY;
+                    DrawBoundingBox(base->bounds, tint);
+                    DrawPoint3D(base->center, col.hit ? WHITE:GRAY);
                 } break;
             default:
                 break;
