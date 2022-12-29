@@ -20,16 +20,19 @@ typedef size_t EntityID;
 
 typedef struct {
     EntityID id;
-    Vector3 pos;
-    Vector3 size;
-    Vector3 rotation;
-
+    BoundingBox bounds;
     Color tint;
+
+    // read only
+    Vector3 center;
+    Vector3 size;
+    Vector3 halfSize;
 } Base;
 
 typedef struct {
     EntityID id;
     Model model;
+    bool accurate;
 } ModelRenderer;
 
 typedef struct {
@@ -38,15 +41,21 @@ typedef struct {
 } EntityGroup;
 
 Base CreateBase(EntityID id, Vector3 pos, Color tint);
-Base CreateDefaultBase(EntityID id);
+#define CreateDefaultBase(ID) CreateBase(ID,Vector3Zero(),WHITE)
+
+void TranslateBase(Base* base, Vector3 offset);
+#define TranslateBaseX(BASE_PTR,X) TranslateBase(BASE_PTR, (Vector3) {X,0.f,0.f})
+#define TranslateBaseY(BASE_PTR,Y) TranslateBase(BASE_PTR, (Vector3) {0.f,Y,0.f})
+#define TranslateBaseZ(BASE_PTR,Z) TranslateBase(BASE_PTR, (Vector3) {0.f,0.f,Z})
+#define TranslateBaseXYZ(BASE_PTR,X,Y,Z) TranslateBase(BASE_PTR, (Vector3) {X,Y,Z})
+#define TranslateBaseZero(BASE_PTR) TranslateBase(BASE_PTR, Vector3Zero())
+
+void SetBaseCenter(Base* base, Vector3 pos);
 
 ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base);
 ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base);
 
-BoundingBox GetBaseBounds(Base base);
-
 RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray);
-RayCollision GetRayCollisionBase(Base base, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
 
 bool GetMousePickedBase(EntityGroup* group, Camera camera, Base** result);

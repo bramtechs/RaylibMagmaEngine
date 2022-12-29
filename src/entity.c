@@ -1,15 +1,24 @@
 #include "entity.h"
 
 Base CreateBase(EntityID id, Vector3 pos, Color tint){
+    BoundingBox box = {
+        pos,
+        Vector3Add(pos,Vector3One())
+    };
+
     return (Base) {
-        id, pos, Vector3One(), Vector3Zero(), tint
+        id, box, tint
     };
 }
 
-Base CreateDefaultBase(EntityID id){
-    return (Base) {
-        id, Vector3Zero(), Vector3One(), Vector3Zero(), WHITE
-    };
+void TranslateBase(Base* base, Vector3 offset){
+    base->bounds.min = Vector3Add(base->bounds.min,offset);
+    base->bounds.max = Vector3Add(base->bounds.max,offset);
+}
+
+void SetBaseCenter(Base* base, Vector3 pos){
+    base->bounds.min = Vector3Subtract(pos,base->halfSize);
+    base->bounds.max = Vector3Add(pos,base->halfSize);
 }
 
 ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base){
@@ -21,18 +30,11 @@ ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base){
 
     // make the base big enough to hold the model
     BoundingBox box = GetModelBoundingBox(model);
-    base->pos = box.min;
-    base->size = Vector3Subtract(box.max,box.min);
+    base->bounds.min = Vector3Add(base->bounds.min, box.min);
+    base->bounds.max = Vector3Add(base->bounds.max, box.max);
 
     return (ModelRenderer) {
-        id, model
-    };
-}
-
-BoundingBox GetBaseBounds(Base base){
-    return (BoundingBox) {
-        base.pos,
-        Vector3Add(base.pos,base.size)
+        id, model, false
     };
 }
 
@@ -46,8 +48,17 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
     while (IterateNextItem(&it,&renderPtr)){
         ModelRenderer *render = (ModelRenderer*) renderPtr;
         Model model = render->model;
-        for (int j = 0; j < model.meshCount; j++){
-            RayCollision col = GetRayCollisionMesh(ray, model.meshes[j], model.transform);
+        if (render->accurate){ // do per triangle collisions
+            for (int j = 0; j < model.meshCount; j++){
+                RayCollision col = GetRayCollisionMesh(ray, model.meshes[j], model.transform);
+                if (col.hit && col.distance < closestDistance){
+                    closestDistance = col.distance;
+                    hit = col;
+                }
+            }
+        }else{ // do bounds collision
+            Base* base = GetEntityComponent(group,render->id,COMP_BASE);
+            RayCollision col = GetRayCollisionBox(ray,base->bounds);
             if (col.hit && col.distance < closestDistance){
                 closestDistance = col.distance;
                 hit = col;
@@ -56,11 +67,6 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
     }
 
     return hit;
-}
-
-RayCollision GetRayCollisionBase(Base base, Ray ray){
-    BoundingBox box = GetBaseBounds(base);
-    return GetRayCollisionBox(ray, box);
 }
 
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
@@ -73,7 +79,7 @@ RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
     mouse.y += GetTopMagmaWindowOffset();
 
     Ray ray = GetMouseRay(mouse,camera);
-    return GetRayCollisionBase(base, ray);
+    return GetRayCollisionBox(ray, base.bounds);
 }
 
 bool GetMousePickedBase(EntityGroup* group, Camera camera, Base** result){
@@ -88,7 +94,6 @@ bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayC
     while (IterateNextItem(&it, &basePtr)){
         Base* base = (Base*) basePtr;
 
-        BoundingBox box = GetBaseBounds(*base);
         RayCollision rayCol = GetMouseRayCollisionBase(*base,camera);
 
         if (rayCol.hit){
@@ -151,7 +156,23 @@ void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter){
 size_t UpdateGroup(EntityGroup* group, float delta){
     assert(group != NULL);
 
-    // IterateArray(group->bases, update_group_entity_bases);
+    ListIterator it = IterateListItems(group->components);
+
+    void* compPtr = NULL;
+    ItemType type = { 0 };
+    while (IterateNextItemEx(&it,&type,&compPtr)){
+        switch (type){
+            case COMP_BASE:
+                {
+                    Base* base = (Base*) compPtr;
+                    base->size = Vector3Subtract(base->bounds.max, base->bounds.min);
+                    base->halfSize = Vector3Scale(base->size, 0.5f);
+                    base->center = Vector3Add(base->bounds.min, base->halfSize);
+                } break;
+            default:
+                break;
+        }
+    }
     return group->entityCount;
 }
 
@@ -174,19 +195,14 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
                         assert(false); // model renderer has no base! TODO shouldn't crash
                     }
 
-                    Vector3 rotNorm = Vector3Normalize(base->rotation);
-                    float rotAmount = Vector3Length(base->rotation);
-
-                    BoundingBox box = GetModelBoundingBox(renderer->model);
-                    DrawModelEx(renderer->model, Vector3Subtract(base->pos,box.min), rotNorm, rotAmount, Vector3One(), base->tint);
+                    DrawModelEx(renderer->model, base->center, Vector3Zero(), 0, Vector3One(), base->tint);
                 } break;
             case COMP_BASE:
                 {
                     if (drawOutlines){
                         Base* base = (Base*) compPtr;
-                        BoundingBox box = GetBaseBounds(*base);
                         RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-                        DrawBoundingBox(box, col.hit ? WHITE:GRAY);
+                        DrawBoundingBox(base->bounds, col.hit ? WHITE:GRAY);
                     }
                 } break;
             default:
@@ -201,7 +217,6 @@ void DrawGroupOutlines(EntityGroup* group, Camera camera){
     Base* picked = NULL;
     if (GetMousePickedBase(group,camera,&picked)){
         RayCollision col = GetMouseRayCollisionBase(*picked,camera);
-        BoundingBox box = GetBaseBounds(*picked);
-        DrawBoundingBox(box, WHITE);
+        DrawBoundingBox(picked->bounds, WHITE);
     }
 }
