@@ -33,7 +33,7 @@ typedef struct {
     EntityID id;
     Model model;
     bool accurate;
-    Vector3 offset; // from base center
+    Vector3 offset; //from base center
 } ModelRenderer;
 
 typedef struct {
