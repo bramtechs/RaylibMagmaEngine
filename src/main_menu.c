@@ -11,24 +11,6 @@ typedef struct {
 static MainMenuSession MenuSession = { 0 };
 static MainMenuConfig MenuConfig = { 0 };
 
-// couroutines.h (HIGHLY EXPERIMENTAL)
-// embrace the goto jank
-
-#define BeginCouroutine() \
-    static float _target = 0.f; \
-    static float _timer = 0.f; \
-    _timer += delta
-
-#define SleepCouroutine(X) \
-    _target += X; \
-    if (_timer < _target) goto cour_end
-
-#define RestartCouroutine() \
-    _timer = 0; \
-    goto cour_end
-
-#define EndCouroutine() cour_end: _target = 0.f
-
 void BootMainMenu(MainMenuConfig config, bool skipSplash){
 
     memcpy(&MenuConfig, &config, sizeof(MainMenuConfig));
@@ -57,20 +39,29 @@ void DrawScreenSaver(float delta){
     c->a = 255;
 }
 
+// TODO make a more flexible/non-hardcoded implemenation
 bool UpdateAndDrawMainMenu(float delta) {
+    if (MenuConfig.width == 0){ // skip if not booted
+        return true;
+    }
+
     BeginMagmaDrawing();
 
     BeginCouroutine();
-    INFO("%f",_timer);
 
     for (int i = 0; i < MenuConfig.splashCount; i++){
         SplashScreen splash = MenuConfig.splashes[i];
         Texture texture = MenuSession.splashTextures[i];
 
-        // TODO make stretch to the entire window
-        DrawTexture(texture, 0, 0, WHITE);
+        float light = MIN(sqrt(sinf(CTIMER*0.5*PI-1.6)+1)*1.5f,1.f);
+        unsigned char lightByte = light*255;
+        Color tint = {lightByte, lightByte, lightByte, 255};
 
-        SleepCouroutine(splash.duration);
+        // TODO make stretch to the entire window
+        DrawTexture(texture, 0, 0, tint);
+        DrawText(TextFormat("%f",light),50,50,72,RED);
+
+        SleepCouroutine(4);
     }
     DrawTexture(MenuSession.bgTexture, 0, 0, WHITE);
 

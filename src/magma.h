@@ -15,6 +15,7 @@
 #include "list.h"
 #include "memory.h"
 #include "logger.h"
+#include "couroutines.h"
 
 // main engine systems
 #include "assets.h"
