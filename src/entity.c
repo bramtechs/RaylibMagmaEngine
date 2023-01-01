@@ -52,16 +52,19 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
     float closestDistance = 10000000;
     RayCollision hit = { 0 };
 
-    void* renderPtr = NULL
+    void* renderPtr = NULL;
     while (IterateNextItem(&it,&renderPtr)){
         ModelRenderer *render = (ModelRenderer*) renderPtr;
         Base* base = GetEntityComponent(group,render->id,COMP_BASE);
         Model model = render->model;
 
         if (render->accurate){ // do per triangle collisions
-            Matrix matrix = Vector3Transform(base->center, model.transform);
+
+            Vector3 offset = Vector3Add(base->center,render->offset);
             for (int j = 0; j < model.meshCount; j++){
-                RayCollision col = GetRayCollisionMesh(ray, model.meshes[j], matrix);
+                RayCollision col = GetRayCollisionMesh(ray, model.meshes[j],
+                                                       MatrixTranslate(offset.x,offset.y,offset.z));
+
                 if (col.hit && col.distance < closestDistance){
                     closestDistance = col.distance;
                     hit = col;
