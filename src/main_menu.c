@@ -59,7 +59,7 @@ bool UpdateAndDrawMainMenu(float delta) {
 
         // TODO make stretch to the entire window
         DrawTexture(texture, 0, 0, tint);
-        DrawText(TextFormat("%f",light),50,50,72,RED);
+        //DrawText(TextFormat("%f",light),50,50,72,RED);
 
         SleepCouroutine(4);
     }
