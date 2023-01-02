@@ -131,12 +131,14 @@ void DisposeEntityGroup(EntityGroup *group){
     // TODO
 }
 
-EntityGroup* ImportEntityGroup(EntityGroup* group, const char* fileName){
-    // TODO
+EntityGroup* LoadEntityGroup(const char* fileName){
+
 }
 
-void ExportEntityGroup(EntityGroup* group, const char* fileName){
-    // TODO
+void SaveEntityGroup(EntityGroup* group, const char* fileName){
+    const char* path = TextFormat("%s/%s.comps",GetAssetFolder(),fileName);
+    //ExportList(group->components, path);
+    INFO("Exported entity component to %s",path);
 }
 
 EntityID AddEntity(EntityGroup* group){

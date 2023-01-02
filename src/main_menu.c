@@ -14,6 +14,8 @@ typedef struct {
     Texture splashTextures[MAX_SPLASHES];
     Texture bgTexture;
 
+    bool isDone;
+
     float timer;
 } MainMenuSession;
 
@@ -32,6 +34,7 @@ void BootMainMenu(MainMenuConfig config, bool skipSplash){
     Session.curSplash = 0;
     Session.timer = 0.f;
     Session.alpha = 0.f;
+    Session.isDone = false;
 
     // load all textures
     Session.bgTexture = RequestTexture(config.bgPath);
@@ -60,7 +63,7 @@ void DrawBackground(Texture texture, Color tint){
 
 // TODO make a more flexible/non-hardcoded implemenation
 bool UpdateAndDrawMainMenu(float delta) {
-    if (MenuConfig.width == 0){ // skip if not booted
+    if (Session.isDone || MenuConfig.width == 0){ // skip if not booted
         return true;
     }
 
@@ -107,6 +110,10 @@ bool UpdateAndDrawMainMenu(float delta) {
 
     if (Session.curSplash >= MenuConfig.splashCount){
         DrawText(MenuConfig.title,20,20,36,WHITE);
+    }
+
+    if (IsKeyPressed(KEY_ENTER)){
+        Session.isDone = true;
     }
 
     EndMagmaDrawing();

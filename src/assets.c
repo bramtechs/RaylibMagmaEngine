@@ -47,6 +47,11 @@ void DisposeAssets(){
     M_MemFree(Assets);
 }
 
+const char* GetAssetFolder(){
+    assert(Assets);
+    return Assets->folder;
+}
+
 Texture RequestTexture(const char* name) {
     const char* path = TextFormat("%s/%s", Assets->folder, name);
 

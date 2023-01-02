@@ -25,6 +25,8 @@ typedef struct {
 void InitAssets(const char* folder);
 void DisposeAssets();
 
+const char* GetAssetFolder();
+
 Texture RequestTexture(const char* name);
 Model RequestModel(const char* name);
 Shader RequestShader(const char* name);

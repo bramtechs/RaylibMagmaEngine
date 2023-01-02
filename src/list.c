@@ -86,6 +86,7 @@ bool IterateNextItemEx(ListIterator* it, ItemType* type, void** result){
 bool IterateNextItem(ListIterator* it, void** result){
     return IterateNextItemEx(it,NULL,result);
 }
+
 void TestList(){
     List* list = MakeList();
 

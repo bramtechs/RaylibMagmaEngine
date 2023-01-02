@@ -65,8 +65,8 @@ bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayC
 EntityGroup* CreateEntityGroup();
 void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!
 
-EntityGroup* ImportEntityGroup(EntityGroup* group, const char* fileName);
-void ExportEntityGroup(EntityGroup* group, const char* fileName);
+EntityGroup* LoadEntityGroup(const char* fileName);
+void SaveEntityGroup(EntityGroup* group, const char* fileName);
 
 EntityID AddEntity(EntityGroup* group);
 
