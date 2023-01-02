@@ -3,7 +3,7 @@
 List* MakeList(){
     List *list = new(List);
 
-    list->capacity = 1000;
+    list->capacity = 100;
     list->data = M_MemAlloc(list->capacity);
 
     return list;
@@ -21,7 +21,6 @@ void PushList(List* list, void* data, size_t size, ItemType type){
     // make sure action has enough memory
     size_t expectedSize = list->size + sizeof(ListItem) + size;
     if (expectedSize >= list->capacity) {
-        // !!! IMPORTANT TODO resize corrupts memory!!!
         list->capacity *= 2;
         TraceLog(LOG_DEBUG, "Reallocated list to capacity of %d bytes", list->capacity);
         list->data = (char*) MemRealloc(list->data, list->capacity);

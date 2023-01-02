@@ -1,42 +1,61 @@
 #include "main_menu.h"
 
+#define FADE_IN  0
+#define DISPLAY  1
+#define FADE_OUT 2
+
 typedef struct {
     bool skipSplash;
-    Color saveCol;
+
+    float alpha;
+    size_t state;
+    size_t curSplash;
 
     Texture splashTextures[MAX_SPLASHES];
     Texture bgTexture;
+
+    float timer;
 } MainMenuSession;
 
-static MainMenuSession MenuSession = { 0 };
+static MainMenuSession Session = { 0 };
 static MainMenuConfig MenuConfig = { 0 };
+
+static Color saveCol = { 0, 0, 0, 255 };
 
 void BootMainMenu(MainMenuConfig config, bool skipSplash){
 
     memcpy(&MenuConfig, &config, sizeof(MainMenuConfig));
 
     // initialize session
-    MainMenuSession* mses = &MenuSession;
-    mses->skipSplash = skipSplash;
-    mses->saveCol = WHITE;
+    Session.skipSplash = skipSplash;
+    Session.state = FADE_IN;
+    Session.curSplash = 0;
+    Session.timer = 0.f;
+    Session.alpha = 0.f;
 
-    // load each texture
-    mses->bgTexture = RequestTexture(config.bgPath);
-    
+    // load all textures
+    Session.bgTexture = RequestTexture(config.bgPath);
     for (int i = 0; i < config.splashCount; i++){
-        mses->splashTextures[i] = RequestTexture(config.splashes[i].imgPath);
+        Session.splashTextures[i] = RequestTexture(config.splashes[i].imgPath);
     }
 
     INFO("Booting main menu!");
 }
 
 void DrawScreenSaver(float delta){
-    ClearBackground(MenuSession.saveCol);
-    Color* c = &MenuSession.saveCol;
+    ClearBackground(saveCol);
+    Color* c = &saveCol;
     c->r += delta*10.f;
     c->g -= delta*10.f;
     c->b += delta*20.f;
     c->a = 255;
+}
+
+void DrawBackground(Texture texture, Color tint){
+    Rectangle src = { 0, 0, texture.width, texture.height };
+    Vector2 winSize = GetMagmaGameSize();
+    Rectangle dest = { 0, 0, winSize.x, winSize.y }; 
+    DrawTexturePro(texture, src, dest, Vector2Zero(), 0.f, tint);
 }
 
 // TODO make a more flexible/non-hardcoded implemenation
@@ -45,27 +64,50 @@ bool UpdateAndDrawMainMenu(float delta) {
         return true;
     }
 
-    BeginMagmaDrawing();
+    float waitTime = FADE_DURATION;
+    Texture texture = Session.splashTextures[Session.curSplash];
 
-    BeginCouroutine();
+    if (Session.curSplash < MenuConfig.splashCount) {
+        switch (Session.state){
+            case FADE_IN:
+                Session.alpha += delta / FADE_DURATION;
+                break;
+            case DISPLAY:
+                SplashScreen splash = MenuConfig.splashes[Session.curSplash];
+                waitTime = splash.duration;
+                Session.alpha = 1.f;
+                break;
+            case FADE_OUT:
+                Session.alpha -= delta / FADE_DURATION;
+                break;
+            default:
+                assert(false);
+        }
 
-    for (int i = 0; i < MenuConfig.splashCount; i++){
-        SplashScreen splash = MenuConfig.splashes[i];
-        Texture texture = MenuSession.splashTextures[i];
-
-        float light = MIN(sqrt(sinf(CTIMER*0.5*PI-1.6)+1)*1.5f,1.f);
-        unsigned char lightByte = light*255;
-        Color tint = {lightByte, lightByte, lightByte, 255};
-
-        // TODO make stretch to the entire window
-        DrawTexture(texture, 0, 0, tint);
-        //DrawText(TextFormat("%f",light),50,50,72,RED);
-
-        SleepCouroutine(4);
+        if (Session.timer > waitTime){
+            Session.timer -= waitTime;
+            Session.state++;
+            if (Session.state > FADE_OUT){
+                Session.state = FADE_IN;
+                Session.curSplash++;
+            }
+        }
+        Session.timer += delta;
     }
-    DrawTexture(MenuSession.bgTexture, 0, 0, WHITE);
+    else {
+        Session.alpha = 1.f;
+        texture = Session.bgTexture;
+    }
 
-    EndCouroutine();
+    BeginMagmaDrawing();
+    
+    char alphaByte = Clamp(Session.alpha*255,0,255);
+    Color tint = { 255, 255, 255, alphaByte };
+    DrawBackground(texture,tint);
+
+    if (Session.curSplash >= MenuConfig.splashCount){
+        DrawText(MenuConfig.title,20,20,36,WHITE);
+    }
 
     EndMagmaDrawing();
     EndDrawing();

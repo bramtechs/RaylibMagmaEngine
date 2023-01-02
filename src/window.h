@@ -16,4 +16,5 @@ float GetMagmaScaleFactor();
 float GetLeftMagmaWindowOffset(); // get the width of the horizontal black bars
 float GetTopMagmaWindowOffset();  // get the height of the vertical black bars
 
+Vector2 GetMagmaGameSize();
 Vector2 GetScaledMousePosition();
