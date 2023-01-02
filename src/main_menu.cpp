@@ -76,8 +76,7 @@ bool UpdateAndDrawMainMenu(float delta) {
                 Session.alpha += delta / FADE_DURATION;
                 break;
             case DISPLAY:
-                SplashScreen splash = MenuConfig.splashes[Session.curSplash];
-                waitTime = splash.duration;
+                waitTime = MenuConfig.splashes[Session.curSplash].duration;
                 Session.alpha = 1.f;
                 break;
             case FADE_OUT:
@@ -85,6 +84,7 @@ bool UpdateAndDrawMainMenu(float delta) {
                 break;
             default:
                 assert(false);
+                break;
         }
 
         if (Session.timer > waitTime){

@@ -2,13 +2,14 @@
 
 #include "raylib.h"
 #include "memory.h"
+#include <string.h>
 
 #define MAX_LINES 128
 #define MAX_LINE_LEN 512
 
 typedef struct {
     TraceLogLevel levels[MAX_LINES];
-    const char lines[MAX_LINES][MAX_LINE_LEN];
+    char lines[MAX_LINES][MAX_LINE_LEN];
     size_t count;
 } LogBuffer;
 

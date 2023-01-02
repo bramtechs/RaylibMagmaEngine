@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+// c++ libraries
+#include <assert.h>
+
 // the all powerful raylib
 #include "raylib.h"
 #include "raygui.h"

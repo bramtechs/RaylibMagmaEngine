@@ -4,7 +4,7 @@ List* MakeList(){
     List *list = new(List);
 
     list->capacity = 100;
-    list->data = M_MemAlloc(list->capacity);
+    list->data = (char*) M_MemAlloc(list->capacity);
 
     return list;
 }
@@ -37,13 +37,8 @@ void PushList(List* list, void* data, size_t size, ItemType type){
 
 ListIterator IterateListItems(List* list){
     assert(list);
-    ListItem* item = list->data;
-    return (ListIterator) {
-        list,
-        item,
-        0,
-        -1
-    };
+    ListItem* item = (ListItem*) list->data;
+    return { list, item, 0, -1 };
 }
 
 ListIterator IterateListItemsEx(List* list, ItemType filter){
@@ -66,7 +61,7 @@ bool IterateNextItemEx(ListIterator* it, ItemType* type, void** result){
             *type = curItem->type;
         }
 
-        char* curItemPtr = curItem;
+        char* curItemPtr = (char*) curItem;
         *result = (void*) (curItemPtr + sizeof(ListItem));
 
         // register next item
@@ -108,7 +103,7 @@ void TestList(){
 
     ItemType type = 0;
     void* data = NULL;
-    while (IterateNextItem(&it,&type,&data)){
+    while (IterateNextItemEx(&it,&type,&data)){
         switch (type){
             case 0:
                 printf("<-- %d\n",*(int*)data);

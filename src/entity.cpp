@@ -6,9 +6,7 @@ Base CreateBase(EntityID id, Vector3 pos, Color tint){
         Vector3Add(pos,Vector3One())
     };
 
-    return (Base) {
-        id, box, tint
-    };
+    return { id, box, tint };
 }
 
 void TranslateBase(Base* base, Vector3 offset){
@@ -55,7 +53,7 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
     void* renderPtr = NULL;
     while (IterateNextItem(&it,&renderPtr)){
         ModelRenderer *render = (ModelRenderer*) renderPtr;
-        Base* base = GetEntityComponent(group,render->id,COMP_BASE);
+        Base* base = (Base*) GetEntityComponent(group,render->id,COMP_BASE);
         Model model = render->model;
 
         if (render->accurate){ // do per triangle collisions
@@ -132,7 +130,7 @@ void DisposeEntityGroup(EntityGroup *group){
 }
 
 EntityGroup* LoadEntityGroup(const char* fileName){
-
+    return nullptr;
 }
 
 void SaveEntityGroup(EntityGroup* group, const char* fileName){
@@ -204,7 +202,7 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
                 {
                     // draw modelrenderers
                     ModelRenderer* renderer = (ModelRenderer*) compPtr;
-                    Base* base = GetEntityComponent(group,renderer->id,COMP_BASE);
+                    Base* base = (Base*) GetEntityComponent(group,renderer->id,COMP_BASE);
 
                     if (base == NULL){
                         assert(false); // model renderer has no base! TODO shouldn't crash

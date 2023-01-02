@@ -7,7 +7,7 @@ PlayerFPS SpawnPlayerFPS(float eyeHeight){
 
     Camera* cam = &player.camera;
     cam->projection = CAMERA_PERSPECTIVE;
-    cam->up = (Vector3){ 0.0f, 1.0f, 0.f };
+    cam->up = { 0.0f, 1.0f, 0.f };
 
     SetCameraMode(*cam,CAMERA_CUSTOM);
 
@@ -39,7 +39,7 @@ Vector3 UpdatePlayerFPS(PlayerFPS* player, EntityGroup* group, float delta){
 
     Vector3 offset = {0,player->eyeHeight,0};
     ray.position = Vector3Add(player->camera.position,offset);
-    ray.direction = (Vector3) {0,-1,0};
+    ray.direction =  {0,-1,0};
 
     RayCollision col = GetRayCollisionGroup(group, ray);
 

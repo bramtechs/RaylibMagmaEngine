@@ -8,17 +8,10 @@ void* M_MemAlloc(size_t size){
     return ptr;
 }
 
-void* M_MemFree(void* ptr)
+void M_MemFree(void** ptr)
 {
     MemFree(ptr);
     Allocations--;
-}
-
-void assert(bool cond) {
-    if (!cond) {
-        int* ptr = NULL;
-        *ptr = 666;
-    }
 }
 
 void CheckAllocations(){

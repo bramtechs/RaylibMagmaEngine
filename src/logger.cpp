@@ -5,7 +5,7 @@ static LogBuffer Buffer = { 0 };
 void LoggerLog(TraceLogLevel level, const char* text){
     Buffer.levels[Buffer.count] = level;
 
-    strcpy(Buffer.lines[Buffer.count],text);
+    strcpy(&Buffer.lines[Buffer.count][0],text);
 
     Buffer.count++;
     if (Buffer.count >= MAX_LINES){
