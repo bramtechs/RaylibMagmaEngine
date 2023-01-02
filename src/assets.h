@@ -12,11 +12,14 @@
 #define MAX_ASSETS 512 
 
 typedef struct {
+    char name[128];
+    Texture texture;
+} TextureContainer;
+
+typedef struct {
     char folder[128];
 
     Array* textures;
-    Array* texturePaths;
-
 } GameAssets;
 
 void InitAssets(const char* folder);
@@ -24,5 +27,6 @@ void DisposeAssets();
 
 Texture RequestTexture(const char* name);
 Model RequestModel(const char* name);
+Shader RequestShader(const char* name);
 
 FilePathList IndexModels(const char* folder);
