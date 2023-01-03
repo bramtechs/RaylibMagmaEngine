@@ -1,10 +1,10 @@
 #include "assets.h"
 
-static GameAssets* Assets = NULL;
+static GameAssets Assets = {0};
 
 bool try_init_assets(const char* folder) {
     if (DirectoryExists(folder)) {
-       strcpy(Assets->folder,folder);
+       Assets.folder = folder;
        INFO("Found assets at %s ...",folder);
        return true;
     }
@@ -13,57 +13,37 @@ bool try_init_assets(const char* folder) {
 }
 
 void InitAssets(const char* folder){
-    Assets = new GameAssets;
-    Assets->textures = MakeArray(sizeof(TextureContainer));
-
     INFO("Loading assets...");
-
     if (try_init_assets(folder)) {
         return;
     }
-
     // visual studio
     if (try_init_assets("../../assets/")) {
         return;
     }
 }
 
-void dispose_texture(int i, void* ptr){
-    Texture texture = ((TextureContainer*) ptr)->texture;
-    UnloadTexture(texture);
-}
-
-void dispose_model(int i, void* ptr){
-    Model model = *(Model*) ptr;
-    UnloadModel(model);
-}
-
 void DisposeAssets(){
-    assert(Assets);
-
-    IterateArray(Assets->textures, dispose_texture);
-    DisposeArray(Assets->textures);
-
-    delete Assets;
+    for (auto pair : Assets.textures){
+        UnloadTexture(pair.second);
+    }
 }
 
 const char* GetAssetFolder(){
-    assert(Assets);
-    return Assets->folder;
+    return Assets.folder.c_str();
 }
 
 Texture RequestTexture(const char* name) {
-    const char* path = TextFormat("%s/%s", Assets->folder, name);
 
     // get cached texture
-    for (int i = 0; i < Assets->textures->count; i++){
-        TextureContainer cont = *GetArrayItem(Assets->textures,i,TextureContainer);
-        if (strcmp(cont.name,name) == 0){
-            return cont.texture;
+    for (auto pair : Assets.textures){
+        if (pair.first == name){
+            return pair.second;
         }
     }
 
     // load texture from disk
+    const char* path = TextFormat("%s/%s", Assets.folder.c_str(), name);
     Texture texture = LoadTexture(path);
     if (texture.width == 0) {
         // failed, generate temporary
@@ -72,18 +52,13 @@ Texture RequestTexture(const char* name) {
         UnloadImage(temp);
     }
 
-    // push into texture array
-    TextureContainer cont = { 0 };
-    strcpy(cont.name, name);
-    cont.texture = texture;
-
-    PushArray(Assets->textures, TextureContainer, &cont);
+    Assets.textures.insert({name,texture});
 
     return texture;
 }
 
 Model RequestModel(const char* name) {
-    const char* path = TextFormat("%s/%s", Assets->folder, name);
+    const char* path = TextFormat("%s/%s", Assets.folder, name);
     Model model = LoadModel(path);
 
     // raylib automatically handles if model isn't found
@@ -93,16 +68,16 @@ Model RequestModel(const char* name) {
 }
 
 Shader RequestShader(const char* name){
-    const char* path = TextFormat("%s/%s", Assets->folder, name);
+    const char* path = TextFormat("%s/%s", Assets.folder, name);
     Shader shader = LoadShader(0, path);
     return shader;
 }
 
 FilePathList IndexModels(const char* folder){
-    const char* path = TextFormat("%s/%s", Assets->folder, folder);
+    const char* path = TextFormat("%s/%s", Assets.folder, folder);
 
     INFO("Indexing %s for models", path);
-    FilePathList list =  LoadDirectoryFilesEx(path, ".obj", true);
+    FilePathList list = LoadDirectoryFilesEx(path, ".obj", true);
     for (int i = 0; i < list.count; i++){
         DEBUG(">>> %s",list.paths[i]);
     }

@@ -13,8 +13,8 @@ add_subdirectory(raygui/projects/CMake)
 add_subdirectory(tester)
 
 # Declaring our executable
-# FILE(GLOB THESAUCE src/*.cpp src/*.h)
-FILE(GLOB THESAUCE src/list.cpp src/list.h)
+FILE(GLOB THESAUCE src/*.cpp src/*.h)
+#FILE(GLOB THESAUCE src/list.cpp src/array.cpp src/list.h src/array.h)
 add_library(${PROJECT_NAME} STATIC ${THESAUCE})
 
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})

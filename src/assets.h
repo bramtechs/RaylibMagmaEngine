@@ -1,26 +1,23 @@
 #pragma once
 
 #include <stdio.h>
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
 
 #include "raylib.h"
 #include "raymath.h"
 
 #include "logger.h"
 #include "memory.h"
-#include "array.h"
 
 #define MAX_ASSETS 512 
 
-typedef struct {
-    char name[128];
-    Texture texture;
-} TextureContainer;
-
-typedef struct {
-    char folder[128];
-
-    Array* textures;
-} GameAssets;
+struct GameAssets {
+    std::string folder;
+    std::unordered_map<std::string, Texture> textures;
+};
 
 void InitAssets(const char* folder);
 void DisposeAssets();

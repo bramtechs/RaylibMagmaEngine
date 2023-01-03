@@ -10,4 +10,6 @@ void main(){
     TestList();
 
     cout << "Tests didn't shit themselves and succeeded!" << endl;
+
+    TestArray();
 }
