@@ -18,7 +18,7 @@ struct List : public std::multimap<ItemType,void*> { // lol
     ~List();
 
     template <typename T>
-    void Push(ItemType type, T& data);
+    void Push(ItemType type, T* data);
 };
 
 void ImportList(List* list, const char* fileName);

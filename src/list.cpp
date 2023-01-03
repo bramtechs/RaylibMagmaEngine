@@ -7,9 +7,9 @@ List::~List(){
 }
 
 template <typename T>
-void List::Push(ItemType type, T& data){
+void List::Push(ItemType type, T* data){
     void* slot = new T;
-    memcpy(slot,(void*)&data,sizeof(T));
+    memcpy(slot,(void*)data,sizeof(T));
     this->insert(std::pair<ItemType,void*>(type,slot));
 }
 
@@ -18,13 +18,13 @@ void TestList(){
 
     for (int i = 0; i < 500; i++){
         int intNumber = i;
-        list.Push(0,intNumber);
+        list.Push(0,&intNumber);
         printf("--> %d\n",intNumber);
     }
 
     for (int i = 0; i < 500; i++){
         long longNumber = 1000000000 + i;
-        list.Push(1,longNumber);
+        list.Push(1,&longNumber);
         printf("--> %d\n",longNumber);
     }
 
