@@ -13,7 +13,7 @@ bool try_init_assets(const char* folder) {
 }
 
 void InitAssets(const char* folder){
-    Assets = new(GameAssets);
+    Assets = new GameAssets;
     Assets->textures = MakeArray(sizeof(TextureContainer));
 
     INFO("Loading assets...");
@@ -44,7 +44,7 @@ void DisposeAssets(){
     IterateArray(Assets->textures, dispose_texture);
     DisposeArray(Assets->textures);
 
-    M_MemFree(Assets);
+    delete Assets;
 }
 
 const char* GetAssetFolder(){

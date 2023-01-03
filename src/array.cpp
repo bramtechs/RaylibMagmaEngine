@@ -5,12 +5,12 @@ Array* MakeArray(size_t itemSize){
     array->itemSize = itemSize;
     array->capacity = 10;
     array->count  = 0;
-    array->data = M_MemAlloc(itemSize * array->capacity);
+    array->data = MemAlloc(itemSize * array->capacity);
     return array;
 }
 
 void DisposeArray(Array* array){
-   M_MemFree(array);
+   MemFree(array);
 }
 
 void* GetArrayItemRaw(Array* array, size_t index){
