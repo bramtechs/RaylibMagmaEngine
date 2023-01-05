@@ -1,7 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <map> 
+
 #include "engine.h"
-#include "list.h"
 #include "window.h"
 #include "memory.h"
 #include "assets.h"
@@ -12,67 +14,70 @@
 #define COMP_BASE               1
 #define COMP_MODEL_RENDERER     2
 
-typedef void(*UPDATE_FUNC)(void*,float);
-typedef void(*DRAW_FUNC)(void*);
-
 typedef size_t EntityID;
+typedef size_t ComponentType;
 
-typedef struct {
-    EntityID id;
-    BoundingBox bounds;
-    Color tint;
+struct Component {
+    ComponentType type;
+    Component(ComponentType type);
+
+    virtual void Update(float delta) = 0;
+    virtual void Draw(Camera* camera, bool drawOutlines = false) = 0;
+};
+
+struct Base : Component {
+    MBoundingBox bounds;
+    RColor tint;
+
+    Base(RVector3 pos, Color tint);
+    Base();
+
+    void Translate(RVector3 offset);
+    inline void Translate(float x, float y, float z);
+    inline void TranslateX(float v);
+    inline void TranslateY(float v);
+    inline void TranslateZ(float v);
+
+    void SetCenter(RVector3 pos);
+    inline void ResetTranslation();
+    
+    bool IsPickedByMouse();
+    RRayCollision GetMouseRayCollision(Base base, Camera camera);
 
     // read only
-    Vector3 center;
-    Vector3 size;
-    Vector3 halfSize;
-} Base;
+    RVector3 center;
+    RVector3 size;
+    RVector3 halfSize;
+};
 
-typedef struct {
-    EntityID id;
+struct ModelRenderer : Component {
     Model model;
     bool accurate;
     Vector3 offset; //from base center
-} ModelRenderer;
 
-typedef struct {
-    size_t entityCount; 
-    List* components;
-} EntityGroup;
+    ModelRenderer(Base* base, RModel model);
 
-Base CreateBase(EntityID id, Vector3 pos, Color tint);
-#define CreateDefaultBase(ID) CreateBase(ID,Vector3Zero(),WHITE)
+    void Update(float delta);
+    void Draw(Camera* camera, bool drawOutlines = false);
+};
 
-void TranslateBase(Base* base, Vector3 offset);
-#define TranslateBaseX(BASE_PTR,X) TranslateBase(BASE_PTR, (Vector3) {X,0.f,0.f})
-#define TranslateBaseY(BASE_PTR,Y) TranslateBase(BASE_PTR, (Vector3) {0.f,Y,0.f})
-#define TranslateBaseZ(BASE_PTR,Z) TranslateBase(BASE_PTR, (Vector3) {0.f,0.f,Z})
-#define TranslateBaseXYZ(BASE_PTR,X,Y,Z) TranslateBase(BASE_PTR, (Vector3) {X,Y,Z})
+struct EntityGroup {
+    size_t count; 
+    std::multimap<EntityID,Component*> components;
 
-void SetBaseCenter(Base* base, Vector3 pos);
-#define ResetBaseTranslation(BASE_PTR) SetBaseCenter(BASE_PTR, Vector3Zero())
+    EntityID AddEntity();
+    template <class T> T* AddComponent(EntityID id, T comp);
 
-ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base);
-ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base);
+    void Update(float delta);
+    void Draw(Camera* camera, bool drawOutlines = false);
 
-RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray);
-RayCollision GetMouseRayCollisionBase(Base base, Camera camera);
+    void ImportFromDisk(const char* fileName);
+    void ExportToDisk(const char* fileName);
 
-bool GetMousePickedBase(EntityGroup* group, Camera camera, Base** result);
-bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayCollision* col);
+    bool MousePickBase(Camera camera, Base** result);
+    bool MousePickBase(Camera camera, Base** result, RayCollision* col);
 
-EntityGroup* CreateEntityGroup();
-void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!
-
-EntityGroup* LoadEntityGroup(const char* fileName);
-void SaveEntityGroup(EntityGroup* group, const char* fileName);
-
-EntityID AddEntity(EntityGroup* group);
-
-void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size);
-
-void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter);
-
-size_t UpdateGroup(EntityGroup* group, float delta);
-
-size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines);
+    Component* GetComponent(EntityID id, ComponentType type);
+    std::multimap<EntityID, Component*> GetComponents(ComponentType type);
+    RRayCollision GetRayCollision(RRay ray);
+};

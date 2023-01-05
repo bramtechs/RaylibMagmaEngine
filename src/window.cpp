@@ -85,10 +85,10 @@ float GetTopMagmaWindowOffset(){
     return (GetScreenHeight() - ((float)Win.gameSize.y*Win.scale))*0.5f;
 }
 
-Vector2 GetMagmaGameSize(){
+RVector2 GetMagmaGameSize(){
     return Win.gameSize;
 }
 
-Vector2 GetScaledMousePosition(){
+RVector2 GetScaledMousePosition(){
     return Win.virtualMouse;
 }

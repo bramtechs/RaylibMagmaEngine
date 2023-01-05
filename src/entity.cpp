@@ -1,61 +1,135 @@
 #include "entity.h"
 
-Base CreateBase(EntityID id, Vector3 pos, Color tint){
-    BoundingBox box = {
+static EntityGroup* Group = nullptr;
+
+// abstract component 
+Component::Component(ComponentType type){
+    this->type = type;
+}
+
+// component base
+Base::Base(RVector3 pos, Color tint) : Component(COMP_BASE){
+    MBoundingBox box = {
         pos,
-        Vector3Add(pos,Vector3One())
+        pos + RVector3::One()
     };
 
-    return { id, box, tint };
+    this->bounds = box;
+    this->tint = tint;
 }
 
-void TranslateBase(Base* base, Vector3 offset){
-    base->bounds.min = Vector3Add(base->bounds.min,offset);
-    base->bounds.max = Vector3Add(base->bounds.max,offset);
+Base::Base() : Base(RVector3::Zero(), WHITE) {
 }
 
-void SetBaseCenter(Base* base, Vector3 pos){
-    base->bounds.min = Vector3Subtract(pos,base->halfSize);
-    base->bounds.max = Vector3Add(pos,base->halfSize);
+void Base::Translate(RVector3 offset){
+    bounds.min += offset;
+    bounds.max += offset;
 }
 
-ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base){
-    Model model = RequestModel(modelPath);
-    return CreateModelRenderer(id, model, base);
+inline void Base::Translate(float x, float y, float z){
+    Translate({ x,y,z });
 }
 
-ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base){
+inline void Base::TranslateX(float v){
+    Translate({v,0.f,0.f});
+}
 
-    // make the base big enough to hold the model
-    BoundingBox modelBox = GetModelBoundingBox(model);
+inline void Base::TranslateY(float v){
+    Translate({0.f,v,0.f});
+}
+
+inline void Base::TranslateZ(float v){
+    Translate({0.f,0.f,v});
+}
+
+void Base::SetCenter(RVector3 pos){
+    bounds.min = pos - halfSize;
+    bounds.max = pos + halfSize;
+}
+
+inline void Base::ResetTranslation(){
+    SetCenter(RVector3::Zero());
+}
+
+bool Base::IsPickedByMouse() {
     
-    Vector3 size = Vector3Subtract(modelBox.max, modelBox.min);
-    base->bounds.max = Vector3Add(base->bounds.min,size);
-
-    Vector3 modelCenter = Vector3Add(modelBox.min,Vector3Scale(size,0.5f));
-    Vector3 offset = Vector3Subtract(base->center,modelCenter);
-
-    ModelRenderer render;
-    render.id = id;
-    render.model = model;
-    render.accurate = false;
-    render.offset = offset;
-
-    return render;
 }
 
-RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
-    ListIterator it = IterateListItemsEx(group->components,COMP_MODEL_RENDERER);
+RRayCollision Base::GetMouseRayCollision(Base base, Camera camera)
+{
+    RVector2 mouse = GetScaledMousePosition();
+
+    // TODO do some terribleness for this to work with letterboxing
+    // TODO turn into own api function
+    mouse = Vector2Scale(mouse,GetMagmaScaleFactor());
+    mouse.x += GetLeftMagmaWindowOffset();
+    mouse.y += GetTopMagmaWindowOffset();
+
+    RRay ray = RRay::GetMouse(camera);
+    return RRayCollision(ray, base.bounds);
+}
+
+// component model renderer
+ModelRenderer::ModelRenderer(Base* base, RModel model) : Component(COMP_MODEL_RENDERER) {
+    // make the base big enough to hold the model
+    MBoundingBox modelBox = MBoundingBox(model.GetBoundingBox());
+    
+    RVector3 size = modelBox.max - modelBox.min;
+    base->bounds.max = base->bounds.min + size;
+
+    RVector3 modelCenter = modelBox.min + (size * 0.5f);
+    RVector3 offset = base->center - modelCenter;
+
+    this->model = model;
+    this->accurate = false;
+    this->offset = offset;
+}
+
+void ModelRenderer::Update(float delta) {
+
+}
+
+void ModelRenderer::Draw(Camera* camera, bool drawOutlines = false) {
+	Base* base = (Base*) GetEntityComponent(group,renderer->id,COMP_BASE);
+
+	if (base == NULL){
+		assert(false); // model renderer has no base! TODO shouldn't crash
+	}
+
+	DrawModelEx(renderer->model, Vector3Add(base->center,renderer->offset), Vector3Zero(), 0, Vector3One(), base->tint);
+}
+
+// entity core 
+Component* EntityGroup::GetComponent(EntityID id, ComponentType type) {
+    for (const auto& item : components) {
+        if (item.first == type && item.first == id) {
+            return item.second;
+        }
+    }
+    assert(false);
+}
+
+std::multimap<EntityID, Component*> EntityGroup::GetComponents(ComponentType type)
+{
+    auto results = std::multimap<EntityID, Component*>();
+    for (const auto& comp : components) {
+        if (comp.second->type == type) {
+            results.insert({ comp.first,comp.second });
+        }
+    }
+    return results;
+}
+
+RRayCollision EntityGroup::GetRayCollision(RRay ray){
 
     float closestDistance = 10000000;
     RayCollision hit = { 0 };
 
-    void* renderPtr = NULL;
-    while (IterateNextItem(&it,&renderPtr)){
-        ModelRenderer *render = (ModelRenderer*) renderPtr;
-        Base* base = (Base*) GetEntityComponent(group,render->id,COMP_BASE);
-        Model model = render->model;
+    for (const auto& comp : GetComponents(COMP_MODEL_RENDERER)){
+        auto render = (ModelRenderer*) comp.second;
+        auto base = (Base*) GetComponent(comp.first,COMP_BASE);
 
+        Model model = render->model;
         if (render->accurate){ // do per triangle collisions
 
             Vector3 offset = Vector3Add(base->center,render->offset);
@@ -78,19 +152,6 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
     }
 
     return hit;
-}
-
-RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
-    Vector2 mouse = GetScaledMousePosition();
-
-    // TODO do some terribleness for this to work with letterboxing
-    // TODO turn into own api function
-    mouse = Vector2Scale(mouse,GetMagmaScaleFactor());
-    mouse.x += GetLeftMagmaWindowOffset();
-    mouse.y += GetTopMagmaWindowOffset();
-
-    Ray ray = GetMouseRay(mouse,camera);
-    return GetRayCollisionBox(ray, base.bounds);
 }
 
 bool GetMousePickedBase(EntityGroup* group, Camera camera, Base** result){
@@ -117,81 +178,36 @@ bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayC
     return false;
 }
 
-
-EntityGroup* CreateEntityGroup() {
-    EntityGroup *g = new(EntityGroup);
-    g->entityCount = 0;
-    g->components = MakeList();
-    return g;
+EntityGroup::EntityGroup() {
+    this->count = 0;
+    this->components = std::multimap<ComponentType,Component*>();
 }
 
-void DisposeEntityGroup(EntityGroup *group){
-    // TODO
-}
-
-EntityGroup* LoadEntityGroup(const char* fileName){
-    return nullptr;
-}
-
-void SaveEntityGroup(EntityGroup* group, const char* fileName){
-    const char* path = TextFormat("%s/%s.comps",GetAssetFolder(),fileName);
-    //ExportList(group->components, path);
-    INFO("Exported entity component to %s",path);
-}
-
-EntityID AddEntity(EntityGroup* group){
-    assert(group != NULL);
-
-    EntityID id = group->entityCount;
-    group->entityCount++;
+EntityID EntityGroup::AddEntity() {
+    EntityID id = count;
+    count++;
     return id;
 }
 
-void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size) {
-    PushList(group->components,data,size,type);
+template <class T> T* EntityGroup::AddComponent(EntityID id, T comp) {
+    T* heapComp = new T;
+    memcpy(headComp, &comp, sizeof(T));
+    components.insert({ id, heapComp });
 }
 
-void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter){
-    ListIterator it = IterateListItemsEx(group->components,filter);
-
-    void* dataPtr = NULL;
-    while (IterateNextItem(&it,&dataPtr)){
-        // TODO dirty hack 
-        EntityID otherId = *((EntityID*) dataPtr);
-        if (otherId == id){
-            return dataPtr;
-        }
+void EntityGroup::Update(float delta){
+    for (const auto& comp : components) {
+        comp.second->Update(delta);
     }
-    return NULL;
 }
 
-
-size_t UpdateGroup(EntityGroup* group, float delta){
-    assert(group != NULL);
-
-    ListIterator it = IterateListItems(group->components);
-
-    void* compPtr = NULL;
-    ItemType type = { 0 };
-    while (IterateNextItemEx(&it,&type,&compPtr)){
-        switch (type){
-            case COMP_BASE:
-                {
-                    Base* base = (Base*) compPtr;
-                    base->size = Vector3Subtract(base->bounds.max, base->bounds.min);
-                    base->halfSize = Vector3Scale(base->size, 0.5f);
-                    base->center = Vector3Add(base->bounds.min, base->halfSize);
-                } break;
-            default:
-                break;
-        }
+void EntityGroup::Draw(Camera* camera, bool drawOutlines = false){
+    for (const auto& comp : components) {
+        comp.second->Draw(camera,drawOutlines);
     }
-    return group->entityCount;
 }
 
-size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
-    assert(group != NULL);
-
+void DrawGroup(Camera* camera, bool drawOutlines = false){
     ListIterator it = IterateListItems(group->components);
 
     void* compPtr = NULL;
@@ -200,15 +216,6 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
         switch (type){
             case COMP_MODEL_RENDERER:
                 {
-                    // draw modelrenderers
-                    ModelRenderer* renderer = (ModelRenderer*) compPtr;
-                    Base* base = (Base*) GetEntityComponent(group,renderer->id,COMP_BASE);
-
-                    if (base == NULL){
-                        assert(false); // model renderer has no base! TODO shouldn't crash
-                    }
-
-                    DrawModelEx(renderer->model, Vector3Add(base->center,renderer->offset), Vector3Zero(), 0, Vector3One(), base->tint);
                 } break;
             case COMP_BASE:
                 {
@@ -232,4 +239,14 @@ void DrawGroupOutlines(EntityGroup* group, Camera camera){
         RayCollision col = GetMouseRayCollisionBase(*picked,camera);
         DrawBoundingBox(picked->bounds, WHITE);
     }
+}
+
+void EntityGroup::ImportFromDisk(const char* fileName) {
+
+}
+
+void EntityGroup::ExportToDisk(const char* fileName){
+    const char* path = TextFormat("%s/%s.comps",GetAssetFolder(),fileName);
+    //ExportList(group->components, path);
+    INFO("Exported entity component to %s",path);
 }
