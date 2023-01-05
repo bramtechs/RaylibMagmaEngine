@@ -1,15 +1,33 @@
-#include <iostream>
-
 #include "magma.h"
 
-using namespace std; // cry about it
+int main() {
+    // Initialization
+    //--------------------------------------------------------------------------------------
+    int screenWidth = 800;
+    int screenHeight = 450;
+    raylib::Color textColor = raylib::Color::LightGray();
+    raylib::Window window(screenWidth, screenHeight, "magma [core] example - basic window");
 
-void main(){
-    cout << "Hello world!" << endl;
+    SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
-    TestList();
+    // Main game loop
+    while (!window.ShouldClose()) {   // Detect window close button or ESC key
+        // Update
+        //----------------------------------------------------------------------------------
+        // Update your variables here
+        //----------------------------------------------------------------------------------
 
-    cout << "Tests didn't shit themselves and succeeded!" << endl;
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+        {
+            window.ClearBackground(ORANGE);
+            textColor.DrawText("Congrats! You created your magma window!", 190, 200, 20);
+        }
+        EndDrawing();
+        //----------------------------------------------------------------------------------
+    }
 
-    TestArray();
+    return 0;
 }

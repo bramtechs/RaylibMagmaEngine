@@ -1,7 +1,6 @@
 #pragma once
 
-#include "raylib.h"
-#include "raymath.h"
+#include "engine.h"
 #include "entity.h"
 
 typedef struct {

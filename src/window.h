@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include "raylib-cpp.hpp"
 #include "raymath.h"
 #include "math_custom.h"
 #include <assert.h>

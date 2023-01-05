@@ -9,6 +9,7 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # don't build the supplied example games
 
 add_subdirectory(raylib)
+add_subdirectory(raylib-cpp)
 add_subdirectory(raygui/projects/CMake)
 add_subdirectory(tester)
 
@@ -19,4 +20,4 @@ add_library(${PROJECT_NAME} STATIC ${THESAUCE})
 
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_INCLUDE} src)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib raygui)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp raygui)

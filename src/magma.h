@@ -7,10 +7,8 @@
 // c++ libraries
 #include <assert.h>
 
-// the all powerful raylib
-#include "raylib.h"
-#include "raygui.h"
-#include "raymath.h"
+// the all powerful raylib (cpp version)
+#include "engine.h"
 
 // small quality of life stuff 
 #include "math_custom.h"

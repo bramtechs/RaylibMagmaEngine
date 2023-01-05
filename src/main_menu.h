@@ -1,7 +1,6 @@
 #pragma once
 
-#include "raylib.h"
-#include "raymath.h"
+#include "engine.h"
 #include "logger.h"
 #include "window.h"
 #include "assets.h"
