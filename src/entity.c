@@ -215,11 +215,13 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
                 } break;
             case COMP_BASE:
                 {
-                    Base* base = (Base*) compPtr;
-                    RayCollision col = GetMouseRayCollisionBase(*base,*camera);
-                    Color tint = col.hit ? WHITE:GRAY;
-                    DrawBoundingBox(base->bounds, tint);
-                    DrawPoint3D(base->center, col.hit ? WHITE:GRAY);
+                    if (drawOutlines){
+                        Base* base = (Base*) compPtr;
+                        RayCollision col = GetMouseRayCollisionBase(*base,*camera);
+                        Color tint = col.hit ? WHITE:GRAY;
+                        DrawBoundingBox(base->bounds, tint);
+                        DrawPoint3D(base->center, col.hit ? WHITE:GRAY);
+                    }
                 } break;
             default:
                 break;
