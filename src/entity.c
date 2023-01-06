@@ -131,13 +131,23 @@ void DisposeEntityGroup(EntityGroup *group){
     // TODO
 }
 
-EntityGroup* LoadEntityGroup(const char* fileName){
+inline const char* get_comp_path(const char* fileName){
+    return TextFormat("%s/%s.comps",GetAssetFolder(),fileName);
+}
 
+void LoadEntityGroup(EntityGroup* group, const char* fileName){
+    const char* path = get_comp_path(fileName);
+
+    DisposeList(group->components);
+    List* list = LoadList(path);
+    group->components = list;
+
+    INFO("Loaded entitygroup from %s",path);
 }
 
 void SaveEntityGroup(EntityGroup* group, const char* fileName){
-    const char* path = TextFormat("%s/%s.comps",GetAssetFolder(),fileName);
-    //ExportList(group->components, path);
+    const char* path = get_comp_path(fileName);
+    SaveList(group->components, path);
     INFO("Exported entity component to %s",path);
 }
 

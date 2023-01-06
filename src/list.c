@@ -3,7 +3,7 @@
 List* MakeList(){
     List *list = new(List);
 
-    list->capacity = 100;
+    list->capacity = 100000;
     list->data = M_MemAlloc(list->capacity);
 
     return list;
@@ -85,6 +85,45 @@ bool IterateNextItemEx(ListIterator* it, ItemType* type, void** result){
 
 bool IterateNextItem(ListIterator* it, void** result){
     return IterateNextItemEx(it,NULL,result);
+}
+
+List* LoadList(const char* fileName) {
+    size_t totalSize = 0;
+
+    if (!FileExists(fileName)) {
+        assert(false);
+    }
+
+    char* data = LoadFileData(fileName, &totalSize);
+    
+    List* list = new(List);
+    memcpy(list,data,sizeof(List)); // copy header
+
+    size_t dataSize = totalSize - sizeof(List); // copy raw data
+    char* rawDataPtr = data + sizeof(List);
+    list->data = M_MemAlloc(dataSize);
+    memcpy(list->data,rawDataPtr,dataSize); // copy header
+
+    UnloadFileData(data);
+
+    return list;
+}
+
+void SaveList(List* list, const char* fileName){
+    size_t size = sizeof(List)+list->size;
+
+    char* data = M_MemAlloc(size);
+    memcpy(data,list,sizeof(List)); // copy header
+
+    char* rawDataPtr = data + sizeof(List);
+    memcpy(rawDataPtr,list->data,list->size); // copy raw data
+
+    if (SaveFileData(fileName, data, size)){
+        INFO("Saved list to %s", fileName);
+    }else{
+        ERROR("Failed to export list!");
+    }
+    M_MemFree(data);
 }
 
 void TestList(){

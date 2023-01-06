@@ -49,7 +49,7 @@ ListIterator IterateListItemsEx(List* list, ItemType filter);
 bool IterateNextItem(ListIterator* it, void** result);
 bool IterateNextItemEx(ListIterator* it, ItemType *type, void** result);
 
-void ImportList(List* list, const char* fileName);
-void ExportList(List* list, const char* fileName);
+List* LoadList(const char* fileName);
+void SaveList(List* list, const char* fileName);
 
 void TestList();

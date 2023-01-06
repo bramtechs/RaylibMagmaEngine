@@ -61,7 +61,6 @@ void DrawBackground(Texture texture, Color tint){
     DrawTexturePro(texture, src, dest, Vector2Zero(), 0.f, tint);
 }
 
-// TODO make a more flexible/non-hardcoded implemenation
 bool UpdateAndDrawMainMenu(float delta) {
     if (Session.isDone || MenuConfig.width == 0){ // skip if not booted
         return true;

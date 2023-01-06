@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
     EntityID id;
-    Model model;
+    Model model; // TODO URGENT THIS CAN'T BE SAVED TO DISK!
     bool accurate;
     Vector3 offset; //from base center
 } ModelRenderer;
@@ -65,7 +65,7 @@ bool GetMousePickedBaseEx(EntityGroup* group, Camera camera, Base** result, RayC
 EntityGroup* CreateEntityGroup();
 void DisposeEntityGroup(EntityGroup *group); // NOTE: custom component arrays need to be disposed manually!
 
-EntityGroup* LoadEntityGroup(const char* fileName);
+void LoadEntityGroup(EntityGroup* group, const char* fileName);
 void SaveEntityGroup(EntityGroup* group, const char* fileName);
 
 EntityID AddEntity(EntityGroup* group);
