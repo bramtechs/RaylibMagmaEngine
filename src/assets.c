@@ -4,8 +4,8 @@ static GameAssets* Assets = NULL;
 
 bool try_init_assets(const char* folder) {
     if (DirectoryExists(folder)) {
-       strcpy(Assets->folder,folder);
        INFO("Found assets at %s ...",folder);
+       assert(ChangeDirectory(folder));
        return true;
     }
     WARN("Did not find assets at %s, keep searching...",folder);
@@ -40,13 +40,7 @@ void DisposeAssets(){
     M_MemFree(Assets);
 }
 
-const char* GetAssetFolder(){
-    assert(Assets);
-    return Assets->folder;
-}
-
 Texture RequestTexture(const char* name) {
-    const char* path = TextFormat("%s/%s", Assets->folder, name);
 
     // get cached texture
     for (int i = 0; i < Assets->textureCount; i++){
@@ -57,7 +51,7 @@ Texture RequestTexture(const char* name) {
     }
 
     // load texture from disk
-    Texture texture = LoadTexture(path);
+    Texture texture = LoadTexture(name);
     if (texture.width == 0) {
         // failed, generate placeholder instead
         Image temp = GenImageChecked(32, 32, 4, 4, RED, WHITE);
@@ -75,8 +69,6 @@ Texture RequestTexture(const char* name) {
 }
 
 Model RequestModel(const char* name) {
-    const char* path = TextFormat("%s/%s", Assets->folder, name);
-
     // get cached model
     for (int i = 0; i < Assets->modelCount; i++){
         ModelContainer cont = Assets->models[i];
@@ -85,7 +77,7 @@ Model RequestModel(const char* name) {
         }
     }
 
-    Model model = LoadModel(path);
+    Model model = LoadModel(name);
 
     // raylib automatically handles if model isn't found
     // NOTE memcopying models doesn't seem to work so you'll have to dispose these things manually for now
@@ -100,20 +92,16 @@ Model RequestModel(const char* name) {
 }
 
 Shader RequestShader(const char* name){
-    const char* path = TextFormat("%s/%s", Assets->folder, name);
-    Shader shader = LoadShader(0, path);
+    Shader shader = LoadShader(0, name);
     return shader;
 }
 
-FilePathList IndexModels(const char* folder){
-    const char* path = TextFormat("%s/%s", Assets->folder, folder);
-
-    INFO("Indexing %s for models", path);
-    FilePathList list =  LoadDirectoryFilesEx(path, ".obj", true);
+// TODO inline
+FilePathList IndexModels(){
+    FilePathList list =  LoadDirectoryFilesEx(".", ".obj", true);
     for (int i = 0; i < list.count; i++){
         DEBUG(">>> %s",list.paths[i]);
     }
-    INFO("Indexed %d models",list.count);
     // TODO dispose
     return list;
 }
