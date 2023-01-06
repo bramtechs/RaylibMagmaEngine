@@ -10,7 +10,6 @@ List* MakeList(){
 }
 
 void DisposeList(List* list){
-    M_MemFree(list->data);
     M_MemFree(list);
 }
 
@@ -94,18 +93,9 @@ List* LoadList(const char* fileName) {
         assert(false);
     }
 
-    char* data = LoadFileData(fileName, &totalSize);
-    
-    List* list = new(List);
-    memcpy(list,data,sizeof(List)); // copy header
-
-    size_t dataSize = totalSize - sizeof(List); // copy raw data
-    char* rawDataPtr = data + sizeof(List);
-    list->data = M_MemAlloc(dataSize);
-    memcpy(list->data,rawDataPtr,dataSize); // copy header
-
-    UnloadFileData(data);
-
+    List* list = (List*) LoadFileData(fileName, &totalSize);
+    char* rawDataPtr = (char*) list + sizeof(List);
+    list->data = rawDataPtr;
     return list;
 }
 
