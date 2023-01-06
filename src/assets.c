@@ -14,7 +14,6 @@ bool try_init_assets(const char* folder) {
 
 void InitAssets(const char* folder){
     Assets = new(GameAssets);
-    Assets->textures = MakeArray(sizeof(TextureContainer));
 
     INFO("Loading assets...");
 
@@ -28,21 +27,15 @@ void InitAssets(const char* folder){
     }
 }
 
-void dispose_texture(int i, void* ptr){
-    Texture texture = ((TextureContainer*) ptr)->texture;
-    UnloadTexture(texture);
-}
-
-void dispose_model(int i, void* ptr){
-    Model model = *(Model*) ptr;
-    UnloadModel(model);
-}
-
 void DisposeAssets(){
     assert(Assets);
 
-    IterateArray(Assets->textures, dispose_texture);
-    DisposeArray(Assets->textures);
+    for (int i = 0; i < Assets->textureCount; i++){
+        UnloadTexture(Assets->textures[i].texture);
+    }
+    for (int i = 0; i < Assets->modelCount; i++){
+        UnloadModel(Assets->models[i].model);
+    }
 
     M_MemFree(Assets);
 }
@@ -56,8 +49,8 @@ Texture RequestTexture(const char* name) {
     const char* path = TextFormat("%s/%s", Assets->folder, name);
 
     // get cached texture
-    for (int i = 0; i < Assets->textures->count; i++){
-        TextureContainer cont = *GetArrayItem(Assets->textures,i,TextureContainer);
+    for (int i = 0; i < Assets->textureCount; i++){
+        TextureContainer cont = Assets->textures[i];
         if (strcmp(cont.name,name) == 0){
             return cont.texture;
         }
@@ -66,29 +59,43 @@ Texture RequestTexture(const char* name) {
     // load texture from disk
     Texture texture = LoadTexture(path);
     if (texture.width == 0) {
-        // failed, generate temporary
+        // failed, generate placeholder instead
         Image temp = GenImageChecked(32, 32, 4, 4, RED, WHITE);
         texture = LoadTextureFromImage(temp);
         UnloadImage(temp);
     }
 
     // push into texture array
-    TextureContainer cont = { 0 };
-    strcpy(cont.name, name);
-    cont.texture = texture;
+    TextureContainer* cont = &Assets->textures[Assets->textureCount];
+    strcpy(cont->name, name);
+    cont->texture = texture;
 
-    PushArray(Assets->textures, TextureContainer, &cont);
-
+    Assets->textureCount++;
     return texture;
 }
 
 Model RequestModel(const char* name) {
     const char* path = TextFormat("%s/%s", Assets->folder, name);
+
+    // get cached model
+    for (int i = 0; i < Assets->modelCount; i++){
+        ModelContainer cont = Assets->models[i];
+        if (strcmp(cont.name,name) == 0){
+            return cont.model;
+        }
+    }
+
     Model model = LoadModel(path);
 
     // raylib automatically handles if model isn't found
-    // TODO memcopying models doesn't seem to work so you'll have to dispose these things manually for now
+    // NOTE memcopying models doesn't seem to work so you'll have to dispose these things manually for now
+    
+    // push into model array
+    ModelContainer* cont = &Assets->models[Assets->modelCount];
+    strcpy(cont->name, name);
+    cont->model = model;
 
+    Assets->modelCount++;
     return model;
 }
 

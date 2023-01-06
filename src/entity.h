@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
     EntityID id;
-    Model model; // TODO URGENT THIS CAN'T BE SAVED TO DISK!
+    const char* model;
     bool accurate;
     Vector3 offset; //from base center
 } ModelRenderer;
@@ -53,8 +53,7 @@ void TranslateBase(Base* base, Vector3 offset);
 void SetBaseCenter(Base* base, Vector3 pos);
 #define ResetBaseTranslation(BASE_PTR) SetBaseCenter(BASE_PTR, Vector3Zero())
 
-ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base);
-ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base);
+ModelRenderer CreateModelRenderer(EntityID id, const char* modelPath, Base* base);
 
 RayCollision GetRayCollisionGroup(EntityGroup* groups, Ray ray);
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera);

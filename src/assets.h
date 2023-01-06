@@ -17,9 +17,18 @@ typedef struct {
 } TextureContainer;
 
 typedef struct {
+    char name[128];
+    Model model;
+} ModelContainer;
+
+typedef struct {
     char folder[128];
 
-    Array* textures;
+    TextureContainer textures[MAX_ASSETS];
+    size_t textureCount;
+
+    ModelContainer models[MAX_ASSETS];
+    size_t modelCount;
 } GameAssets;
 
 void InitAssets(const char* folder);

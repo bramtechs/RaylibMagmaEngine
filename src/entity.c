@@ -21,12 +21,9 @@ void SetBaseCenter(Base* base, Vector3 pos){
     base->bounds.max = Vector3Add(pos,base->halfSize);
 }
 
-ModelRenderer CreateModelRendererFromFile(EntityID id, const char* modelPath, Base* base){
-    Model model = RequestModel(modelPath);
-    return CreateModelRenderer(id, model, base);
-}
+ModelRenderer CreateModelRenderer(EntityID id, const char* modelPath, Base* base){
 
-ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base){
+    Model model = RequestModel(modelPath);
 
     // make the base big enough to hold the model
     BoundingBox modelBox = GetModelBoundingBox(model);
@@ -39,7 +36,7 @@ ModelRenderer CreateModelRenderer(EntityID id, Model model, Base* base){
 
     ModelRenderer render;
     render.id = id;
-    render.model = model;
+    render.model = modelPath;
     render.accurate = false;
     render.offset = offset;
 
@@ -56,7 +53,7 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
     while (IterateNextItem(&it,&renderPtr)){
         ModelRenderer *render = (ModelRenderer*) renderPtr;
         Base* base = GetEntityComponent(group,render->id,COMP_BASE);
-        Model model = render->model;
+        Model model = RequestModel(render->model);
 
         if (render->accurate){ // do per triangle collisions
 
@@ -220,7 +217,8 @@ size_t DrawGroup(EntityGroup* group, Camera* camera, bool drawOutlines){
                         assert(false); // model renderer has no base! TODO shouldn't crash
                     }
 
-                    DrawModelEx(renderer->model, Vector3Add(base->center,renderer->offset), Vector3Zero(), 0, Vector3One(), base->tint);
+                    Model model = RequestModel(renderer->model);
+                    DrawModelEx(model, Vector3Add(base->center,renderer->offset), Vector3Zero(), 0, Vector3One(), base->tint);
                 } break;
             case COMP_BASE:
                 {

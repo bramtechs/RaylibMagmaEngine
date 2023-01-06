@@ -119,7 +119,7 @@ void SaveList(List* list, const char* fileName){
     memcpy(rawDataPtr,list->data,list->size); // copy raw data
 
     if (SaveFileData(fileName, data, size)){
-        INFO("Saved list to %s", fileName);
+        DEBUG("Saved list to %s", fileName);
     }else{
         ERROR("Failed to export list!");
     }
