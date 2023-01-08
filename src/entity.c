@@ -80,15 +80,7 @@ RayCollision GetRayCollisionGroup(EntityGroup* group, Ray ray){
 }
 
 RayCollision GetMouseRayCollisionBase(Base base, Camera camera){
-    Vector2 mouse = GetScaledMousePosition();
-
-    // TODO do some terribleness for this to work with letterboxing
-    // TODO turn into own api function
-    mouse = Vector2Scale(mouse,GetMagmaScaleFactor());
-    mouse.x += GetLeftMagmaWindowOffset();
-    mouse.y += GetTopMagmaWindowOffset();
-
-    Ray ray = GetMouseRay(mouse,camera);
+    Ray ray = GetWindowMouseRay(camera);
     return GetRayCollisionBox(ray, base.bounds);
 }
 

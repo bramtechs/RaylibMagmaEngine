@@ -18,3 +18,4 @@ float GetTopMagmaWindowOffset();  // get the height of the vertical black bars
 
 Vector2 GetMagmaGameSize();
 Vector2 GetScaledMousePosition();
+Ray GetWindowMouseRay(Camera camera);
