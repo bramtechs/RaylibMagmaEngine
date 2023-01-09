@@ -69,7 +69,7 @@ void SaveEntityGroup(EntityGroup* group, const char* fileName);
 
 EntityID AddEntity(EntityGroup* group);
 
-void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size);
+void AddEntityComponent(EntityGroup* group, ItemType type, EntityID id, void* data, size_t size);
 
 void* GetEntityComponent(EntityGroup* group, EntityID id, ItemType filter);
 

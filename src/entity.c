@@ -141,7 +141,7 @@ EntityID AddEntity(EntityGroup* group){
     return id;
 }
 
-void AddEntityComponent(EntityGroup* group, ItemType type, EntityID* data, size_t size) {
+void AddEntityComponent(EntityGroup* group, ItemType type, EntityID id, void* data, size_t size) {
     PushList(group->components,data,size,type);
 }
 
