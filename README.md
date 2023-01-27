@@ -1,3 +1,5 @@
+> Warning: This version of Magma Engine is out of date! Check the bleeding edge version in [dream-emu repo](https://github.com/bramtechs/dream-emu)!
+
 # Raylib Magma Engine
 
 ## Work-in-progress, very buggy, do not use!
